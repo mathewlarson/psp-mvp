@@ -173,7 +173,7 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 
 <header class="hdr">
   <h1>Public Safety <span>Pulse</span></h1>
-  <div class="hdr-meta">City Science Lab SF × MIT Media Lab &nbsp;|&nbsp; Phase 0 MVP — Proxy Data Model</div>
+  <div class="hdr-meta">City Science Lab SF × MIT Media Lab &nbsp;|&nbsp; MVP — Building the Missing Safety Signal</div>
 </header>
 
 <nav class="nav" id="nav">
@@ -199,40 +199,59 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
     <div style="font-size:.78rem;color:var(--t3)">— Derrick Lew, SFPD Chief of Police, January 2026</div>
   </div>
 
-  <p class="body" style="margin-bottom:20px">San Francisco is making real progress. Crime fell 25% in 2025, homicides hit their lowest level since 1954, and 64% of residents now say the city is headed in the right direction. But a perception gap persists: in the most recent City Survey (2023), only 63% felt safe walking during the day — down from 85% in 2019 — and just 36% at night, down from 53%. Even as crime declines, roughly 4 in 10 residents still don't feel safe by day, and nearly two-thirds don't at night. That gap between improving conditions and lingering unease is the opportunity Public Safety Pulse is designed to address — by building the data infrastructure to understand what drives the feeling of safety, not just the statistics.</p>
+  <p class="body" style="margin-bottom:20px">San Francisco is making real progress. Crime fell 25% in 2025, homicides hit their lowest level since 1954, and 64% of residents now say the city is headed in the right direction (CityBeat 2026). Perceptions are improving too — nearly 6 in 10 voters say crime has gotten better, and downtown safety perceptions are at their highest levels in years. But a gap persists: the most recent broad-based survey (Partnership for San Francisco, Nov 2025, n=500) found almost half of voters still rate safety as poor or only fair. The 2023 City Survey — the most recent to ask about walking specifically — found only 63% felt safe during the day (down from 85% in 2019) and just 36% at night (down from 53%).</p>
+
+  <p class="body" style="margin-bottom:20px"><strong>What's largely missing is a direct, ongoing signal from the people who actually experience the city</strong> — residents, workers, visitors — about how safe they feel, where, and when. Some organizations may already collect forms of this data through customer feedback, resident surveys, or service interactions, but it isn't aggregated or used as a safety signal. Crime data tells us what happened. 311 tells us what people reported. Broad surveys happen infrequently. What we lack is a systematic, high-frequency, place-based measure of the ambient feeling of safety that shapes whether someone walks down a street, visits a business, or avoids an area entirely.</p>
 
   <div class="mrow">
     <div class="mc"><div class="mv">25%</div><div class="ml">Crime decline in 2025</div><div class="md">SFPD · Lowest homicides since 1954</div></div>
     <div class="mc"><div class="mv">64%</div><div class="ml">Say SF on right track</div><div class="md">CityBeat 2026 · Up from 22% in 2024</div></div>
-    <div class="mc a"><div class="mv">63%</div><div class="ml">Feel safe walking (day)</div><div class="md">Down from 85% · 2019→2023 City Survey</div></div>
-    <div class="mc a"><div class="mv">36%</div><div class="ml">Feel safe walking (night)</div><div class="md">Down from 53% · 2019→2023 City Survey</div></div>
+    <div class="mc a"><div class="mv">~48%</div><div class="ml">Rate safety poor or fair</div><div class="md">Partnership for SF · Nov 2025 (n=500)</div></div>
+    <div class="mc a"><div class="mv">36%</div><div class="ml">Feel safe walking at night</div><div class="md">Down from 53% · 2019→2023 City Survey</div></div>
   </div>
 
   <div class="ibox">
-    <div class="il">Progress, Gaps, and the Opportunity</div>
-    <p>The trend is real: crime is down, optimism is up, and nearly 6 in 10 voters say crime has gotten better. But the most recent perception data (2023 City Survey) still shows significant unease — especially at night, among older residents, and in specific neighborhoods. <em>We don't yet have the granular, high-frequency data to understand what's driving that remaining gap</em> — or to measure whether specific interventions are closing it. This MVP fuses <em>28 public data sources</em> into a proxy model of perceived safety. It shows what existing data can approximate. Phase 1 tests whether we can build the missing signal: direct, place-based sentiment that complements this data and is specific enough to inform targeted interventions.</p>
+    <div class="il">The Missing Signal</div>
+    <p>There is no known high-frequency, place-based dataset that systematically captures how people <em>feel</em> about their safety across San Francisco's neighborhoods. Most existing public data sources — crime reports, 311 calls, transit ridership — are <em>proxies</em>: indirect signals generated after something has already happened or been reported. Some organizations — venues, transit agencies, building managers — may already collect forms of experience feedback from customers and residents, but this data isn't currently aggregated or used as a safety perception signal. <em>Building that aggregated signal is the first step.</em></p>
+  </div>
+
+  <div class="ibox" style="background:var(--white);color:var(--t1);border:2px solid var(--dk)">
+    <div class="il" style="color:var(--dk)">Why This Matters — What Existing Research Suggests</div>
+    <p style="color:var(--t2)">A growing body of urban research points to a gap between objective safety data and how people experience their environment:</p>
+    <p style="color:var(--t2);margin-top:8px">• <strong>Perceived safety affects walking behavior.</strong> Kim et al. (2024, <em>Frontiers in Public Health</em>) found that pedestrians forgo walking when they feel unsafe, regardless of actual risk — and that both physical safety and perceived safety must be addressed to promote walking. Schneider et al. (2004) similarly found that subjective sense of security significantly affects walking behavior and route choice.</p>
+    <p style="color:var(--t2);margin-top:6px">• <strong>Built environment shapes perception independently of crime.</strong> Ceccato & Bamzar (2022, <em>ScienceDirect</em>) found that informal surveillance (people's presence), visible disorder (trash, graffiti, damaged infrastructure), and building type are more significant predictors of perceived security than police presence — suggesting that factors unmeasured by crime data drive the feeling of safety.</p>
+    <p style="color:var(--t2);margin-top:6px">• <strong>Walkable environments correlate with economic activity.</strong> Yoshimura et al. (2021, MIT Senseable City Lab) found that stores in pedestrianized environments recorded higher sales volumes, with the mechanism tied to store density and foot traffic in areas people feel comfortable walking through.</p>
+    <p style="color:var(--t2);margin-top:6px">• <strong>Safety perception is gendered and context-dependent.</strong> A 2024 CHI study (n=449) found that intersections of identity — gender, age, disability, race — significantly affect safety concerns and walking behavior, meaning a single crime statistic cannot represent how different populations experience the same block.</p>
+    <p style="color:var(--t2);margin-top:8px">Together, these findings suggest that measuring the feeling of safety — directly, at high frequency, in specific places — could provide information that incident data alone cannot, and that this information is relevant to foot traffic, spending, and economic outcomes.</p>
   </div>
 
   <div class="cmp">
     <div class="cmp-c">
-      <h3>What This MVP Shows (Proxy Data)</h3>
-      <div class="cmp-r">311 disorder reports — lagging, biased toward engaged reporters</div>
-      <div class="cmp-r">Crime incidents — only what's reported to and filed by police</div>
-      <div class="cmp-r">Biennial City Survey — 2-year lag, neighborhood-level only</div>
-      <div class="cmp-r">Yelp review mining — business-adjacent locations only</div>
-      <div class="cmp-r">Transit ridership — infers avoidance indirectly, no causation</div>
+      <h3>What Exists Today (Complementary Data)</h3>
+      <div class="cmp-r">311 disorder reports — what people report, not how they feel</div>
+      <div class="cmp-r">Crime incidents — what police file, lagging and incomplete</div>
+      <div class="cmp-r">City Survey — biennial, 2-year lag, neighborhood-level only</div>
+      <div class="cmp-r">Yelp reviews — business-adjacent, self-selected reviewers</div>
+      <div class="cmp-r">Transit ridership — infers behavior, not experience</div>
+      <div class="cmp-r" style="font-weight:600;border-bottom:none;padding-top:8px">28 sources, 1.5M+ records — all proxies, none direct</div>
     </div>
     <div class="cmp-c p1">
-      <h3>What Phase 1 Tests (Direct Signal)</h3>
-      <div class="cmp-r">Can high-frequency sentiment be collected reliably?</div>
-      <div class="cmp-r">Which channels, wording, and moments yield quality data?</div>
-      <div class="cmp-r">What volume is needed for stable block-level patterns?</div>
-      <div class="cmp-r">Test channels: POS, transit, building check-in, QR codes</div>
-      <div class="cmp-r">Goal: validate whether direct perception data is viable at scale</div>
+      <h3>What's Missing (Direct Sentiment)</h3>
+      <div class="cmp-r">How do people feel <em>right now</em> in a specific place?</div>
+      <div class="cmp-r">High-frequency: daily or weekly, not biennial</div>
+      <div class="cmp-r">Granular: block-level, time-of-day resolution</div>
+      <div class="cmp-r">Universal: residents, workers, visitors — not just reporters</div>
+      <div class="cmp-r">Actionable: specific enough to inform targeted interventions</div>
+      <div class="cmp-r" style="font-weight:600;border-bottom:none;padding-top:8px">This is the signal Public Safety Pulse is designed to capture</div>
     </div>
   </div>
 
-  <div style="font-size:.7rem;color:var(--t3);margin-top:12px">Sources: SF City Performance Survey 2019 & 2023, SFPD 2025 Crime Data, CityBeat 2026 Poll (SF Chamber of Commerce / EMC Research, Jan 2026, n=500), GrowSF July 2025 Poll</div>
+  <div class="card" style="border-left:4px solid var(--coral)">
+    <div class="h3">MVP Approach: Start With What Already Exists</div>
+    <p class="body">Before building new data infrastructure, we're asking: <strong>is anyone already collecting experience data we can use?</strong> Venues ask customers for feedback. City agencies survey constituents. Housing developments check in with residents. Transit systems track satisfaction. If we can aggregate existing sentiment signals — already being captured by businesses, agencies, and building systems — we can build an MVP Public Safety Pulse model and test whether the signal is viable. This dashboard shows the complementary dataset alongside that goal.</p>
+  </div>
+
+  <div style="font-size:.7rem;color:var(--t3);margin-top:12px">Sources: SF City Performance Survey 2019 & 2023, SFPD 2025 Crime Data, CityBeat 2026 Poll (SF Chamber / EMC Research, Jan 2026, n=500), Partnership for San Francisco Insights Survey (EMC Research, Nov 2025, n=500), GrowSF July 2025 Poll. Research: Kim et al. 2024 (<em>Frontiers in Public Health</em>), Schneider et al. 2004, Ceccato & Bamzar 2022, Yoshimura et al. 2021 (MIT Senseable City Lab), CHI 2024.</div>
 </div>
 </div>
 
@@ -244,7 +263,7 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-bottom:14px">
     <div>
       <div class="h2">Perception Map</div>
-      <div class="sub" style="margin-bottom:0">Each neighborhood is colored by its Safety Perception Index — a composite of disorder, crime, lighting, transit, business health, and more. Red = lower perceived safety. Green = higher.</div>
+      <div class="sub" style="margin-bottom:0">This map shows what complementary data can approximate about safety perception. Each neighborhood is scored using 15 indicators — disorder, crime, lighting, transit, business health, and more. Red = conditions associated with lower perceived safety. Green = higher. <strong>What's missing: a direct signal from the people in these neighborhoods about how they actually feel.</strong></div>
     </div>
   </div>
 
@@ -265,7 +284,7 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 
   <div class="ibox" style="margin-top:16px">
     <div class="il">What You're Seeing — And What You're Not</div>
-    <p>This map approximates safety perception using proxy data. Neighborhoods like the Tenderloin and SoMa score lowest because they concentrate disorder reports, crime, emergency calls, and streetlight outages. But <em>this is a neighborhood average</em> — within any neighborhood, conditions vary block by block. And <em>places people avoid generate less data</em>, so they may appear artificially safe. Phase 1 tests whether direct sentiment collection through existing touchpoints can reveal both the within-neighborhood variation and the silent avoidance zones that proxy data misses.</p>
+    <p>This map shows the <em>complementary dataset</em> — what 28 public data sources can approximate about safety conditions. Neighborhoods like the Tenderloin and SoMa score lowest because they concentrate disorder reports, crime, and emergency calls. But <em>this is not a measure of how people feel</em> — it's a model built from proxy indicators. Places people avoid generate less data, so they may appear artificially safe. Within any neighborhood, conditions vary block by block. The direct sentiment signal — the actual feeling of a resident walking to work, a tourist leaving a restaurant, a worker entering a building — is the component this data is not designed to capture. That's the gap.</p>
   </div>
 </div>
 </div>
@@ -276,11 +295,14 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <div class="pnl" id="p-index">
 <div class="sec">
   <div class="h2">Safety Index Rankings</div>
-  <div class="sub">All neighborhoods ranked by their composite Safety Perception Index — drawn from 15 indicators across 28 data sources. Higher scores indicate conditions associated with better perceived safety.</div>
+  <div class="sub">All neighborhoods ranked by a composite score drawn from 15 indicators across 28 complementary data sources. These are updated periodically based on public data releases — typically monthly or quarterly — at the neighborhood level.</div>
 
   <div class="ibox">
-    <div class="il">MVP — Important Context</div>
-    <p>This is a <em>proxy model under development</em>, not a validated safety measure. Scores are composites of public data indicators — things that research shows correlate with perceived safety. They are <em>not direct measures of how safe people feel</em>. A neighborhood with a low score has high disorder, crime, and emergency call density relative to others — but the actual experience of walking through that neighborhood varies enormously by block, time of day, and personal context. Component weights come from urban safety literature, not yet calibrated to San Francisco. <em>Phase 1 tests whether direct sentiment data can validate and improve this model.</em></p>
+    <div class="il">What This Shows — and What Public Safety Pulse Could Add</div>
+    <p>These scores are composites of <em>conditions associated with perceived safety</em> — not measurements of how safe people feel. A neighborhood with a low score has high disorder, crime, and emergency call density relative to others. But the actual experience of walking through that neighborhood varies enormously by block, time of day, and personal context. A senior citizen, a tourist, a delivery worker, and a parent with children may all feel very differently about the same block at the same time.</p>
+    <p style="margin-top:10px"><strong>Public Safety Pulse aims to enhance this in two ways:</strong></p>
+    <p style="margin-top:6px"><em>1. Near-real-time, high-frequency updates.</em> This index updates when public datasets refresh — often monthly or quarterly. A direct sentiment signal collected through existing touchpoints could update daily or weekly, flagging when conditions are shifting <em>before</em> they show up in incident data — enabling proactive response rather than reactive intervention after an incident has already occurred.</p>
+    <p style="margin-top:6px"><em>2. Granular, block-by-block resolution.</em> This index operates at the neighborhood level — an average across many blocks. A direct sentiment signal tied to specific locations (a transit stop, a storefront, a building lobby) could reveal the block-level variation that neighborhood averages mask. Two blocks within the same neighborhood can feel entirely different — and resource deployment should reflect that.</p>
   </div>
 
   <div class="card">
@@ -316,7 +338,7 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 
   <div class="ibox">
     <div class="il">What Phase 1 Adds</div>
-    <p>This table uses 311 and crime timestamps to estimate how conditions change by time of day. But <em>perception shifts aren't just about incident volume</em> — they're about who's on the street, how well-lit the block is, whether shops are open, whether other people feel present and safe. A nearly empty street at midnight might feel dangerous even with zero incidents. <em>Phase 1 tests whether direct sentiment capture can measure what timestamps alone cannot.</em></p>
+    <p>This table uses 311 and crime timestamps to estimate how conditions change by time of day. But <em>perception isn't just about incident volume</em> — it's about who's on the street, how well-lit the block is, whether shops are open, whether other people feel present and safe. A nearly empty street at midnight might feel dangerous even with zero incidents. The complementary data can show <em>when</em> conditions worsen. Only direct sentiment from the people actually there can show <em>how it feels</em> — and that's the signal we need to capture.</p>
   </div>
 </div>
 </div>
@@ -326,12 +348,12 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <!-- ═══════════════════════════════════════ -->
 <div class="pnl" id="p-how">
 <div class="sec">
-  <div class="h2">How the Safety Index Is Built</div>
-  <div class="sub">We measure 15 indicators across three categories — things that <em>happened</em>, things you can <em>see and feel</em>, and how people <em>respond</em> — then combine them into a single score per neighborhood.</div>
+  <div class="h2">How the Complementary Data Model Works</div>
+  <div class="sub">We organized 28 public data sources into three layers — things that <em>happened</em>, things you can <em>see and feel</em>, and how people <em>respond</em>. Together they form the complementary dataset. What they don't contain is the missing fourth layer: <strong>what people actually feel</strong>.</div>
 
   <div class="card">
-    <div class="h3">Three Layers of Signal</div>
-    <div style="font-size:.78rem;color:var(--t2);margin-bottom:16px">Each layer gets progressively closer to actual perception. Phase 1 adds the missing fourth layer: <strong>direct sentiment</strong>.</div>
+    <div class="h3">Three Layers of Complementary Data</div>
+    <div style="font-size:.78rem;color:var(--t2);margin-bottom:16px">Each layer captures something real — but none captures the direct experience of feeling safe or unsafe. That's the fourth layer.</div>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px">
       <div style="background:var(--cream);border-radius:var(--r);padding:18px;border-top:3px solid #C0392B">
@@ -363,14 +385,40 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
     </div>
   </div>
 
-  <div class="ibox">
-    <div class="il">The Missing Layer</div>
-    <p>All three layers are <em>proxy data</em> — indirect signals that research shows correlate with safety perception. The Public Safety Pulse vision adds a <em>fourth layer: direct sentiment</em>. Phase 1 is a 6-month pilot to test whether asking "How does this area feel to you?" through existing digital touchpoints (POS, transit, building check-in) can produce a reliable, high-frequency signal — and whether that signal validates or challenges our proxy model.</p>
+  <div class="ibox" style="border:2px solid var(--coral);background:var(--dk)">
+    <div class="il" style="color:var(--coral-lt)">Layer 4: The Missing Signal — Direct Sentiment</div>
+    <p>All three layers above are <em>complementary data</em> — they describe conditions, incidents, and behavioral responses. What they don't capture is the <em>ambient, in-the-moment experience</em> of feeling safe or unsafe in a specific place at a specific time.</p>
+    <p style="margin-top:10px">Three reasons this gap matters:</p>
+    <p style="margin-top:6px"><em>1. Perception shapes walking and spending behavior.</em> Kim et al. (2024) found pedestrians forgo walking when they feel unsafe regardless of actual risk. Ceccato & Bamzar (2022) found visible disorder — not crime statistics — is among the strongest predictors of perceived security. A block can be statistically safe but feel threatening. Resources deployed on crime data alone may miss what's actually shaping behavior.</p>
+    <p style="margin-top:6px"><em>2. Proxy data has systematic blind spots.</em> 311 over-represents neighborhoods with engaged reporters. Crime data only captures what's reported. Avoided areas generate less data, appearing artificially safe. These biases compound in any proxy model — including this one.</p>
+    <p style="margin-top:6px"><em>3. Measuring intervention impact requires a feedback loop.</em> Without a direct perception signal at sufficient frequency, it's difficult to know whether a streetlight repair, ambassador deployment, or cleanup initiative actually changed how people feel. The complementary data alone may not provide this at the cadence or granularity needed.</p>
+    <p style="margin-top:10px"><strong>Public Safety Pulse is designed to capture this missing signal</strong> by exploring whether experience data already being collected — by venues, city agencies, transit systems, building management, and other touchpoints — can be aggregated into a high-frequency, place-based sentiment measure that complements the data shown here.</p>
   </div>
 
   <div style="margin-top:20px">
-    <div class="h3" style="margin-bottom:10px">If Phase 1 Validates the Signal: What Becomes Possible</div>
-    <div style="font-size:.78rem;color:var(--t2);margin-bottom:10px">These are illustrative examples of the type of insights a validated direct-sentiment system could produce — not current capabilities.</div>
+    <div class="h3" style="margin-bottom:6px">The Vision: From Signal to Outcomes</div>
+    <div style="font-size:.82rem;color:var(--t2);line-height:1.5;margin-bottom:14px">If we can capture the missing sentiment signal and combine it with this complementary dataset, we unlock a powerful feedback loop:</div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:16px">
+      <div style="background:var(--cream);padding:16px;border-radius:var(--r);border-top:3px solid var(--dk)">
+        <div style="font-weight:700;font-size:.78rem;color:var(--dk);margin-bottom:4px">1. Capture the Signal</div>
+        <div style="font-size:.78rem;color:var(--t2);line-height:1.45">Aggregate existing experience data from venues, agencies, transit, and building systems into a direct sentiment measure</div>
+      </div>
+      <div style="background:var(--cream);padding:16px;border-radius:var(--r);border-top:3px solid var(--mid)">
+        <div style="font-weight:700;font-size:.78rem;color:var(--dk);margin-bottom:4px">2. Build the Correlation Engine</div>
+        <div style="font-size:.78rem;color:var(--t2);line-height:1.45">Combine direct sentiment with complementary data to understand what drives the feeling of safety — and predict where perception is shifting</div>
+      </div>
+      <div style="background:var(--cream);padding:16px;border-radius:var(--r);border-top:3px solid var(--coral)">
+        <div style="font-weight:700;font-size:.78rem;color:var(--dk);margin-bottom:4px">3. Inform Interventions</div>
+        <div style="font-size:.78rem;color:var(--t2);line-height:1.45">Deploy targeted resources — cleaning, lighting, ambassadors, activation — based on where perception drops, not just where incidents occur</div>
+      </div>
+      <div style="background:var(--cream);padding:16px;border-radius:var(--r);border-top:3px solid #27AE60">
+        <div style="font-weight:700;font-size:.78rem;color:var(--dk);margin-bottom:4px">4. Measure Outcomes</div>
+        <div style="font-size:.78rem;color:var(--t2);line-height:1.45">Track whether interventions improve how people feel — driving foot traffic, spending, tourism, investment, and resident confidence</div>
+      </div>
+    </div>
+
+    <div style="font-size:.78rem;color:var(--t2);margin-bottom:14px">Illustrative examples of what this feedback loop makes possible:</div>
     <div class="alrt">
       <div class="at">⚠ Illustrative Perception Drop Alert</div>
       <div class="ah">Mid-Market / 6th & Market — SPI dropped 12 points (evening window)</div>
@@ -484,11 +532,33 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <div class="pnl" id="p-act">
 <div class="sec">
   <div class="h2">Partner With Us</div>
-  <div class="sub">San Francisco's safety trajectory is improving — but we still lack the granular data to understand what's driving the remaining perception gap. Phase 1 is a 6-month pilot to test whether direct sentiment can be collected reliably through existing digital touchpoints, and whether it complements existing data to inform targeted interventions.</div>
+  <div class="sub">The city is improving — but we're missing the data to understand what's still driving the perception gap, and to measure whether interventions are working. Building that signal is the first step.</div>
 
   <div class="ibox">
-    <div class="il">The Core Question Phase 1 Answers</div>
-    <p>Everything in this dashboard is proxy data. <em>28 data sources, ~1.5 million records</em> — all approximating what one question could measure directly: <strong>"Right now, how does the surrounding area feel to you?"</strong> Phase 1 tests whether that question, delivered through existing channels at high frequency, produces a reliable and actionable signal.</p>
+    <div class="il">What We Need First</div>
+    <p>Before building new infrastructure, we need to test whether the missing sentiment signal can be captured at all. <em>Is anyone already collecting experience data we can use?</em> Venues, transit systems, city agencies, building management, and housing developments already gather resident and visitor feedback. Phase 1 explores whether this data can be aggregated into a high-frequency, place-based safety perception signal — and whether it's specific enough to complement the 28 proxy sources shown in this dashboard.</p>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--dk)">
+    <div class="h3">The Path Forward</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:12px">
+      <div>
+        <div style="font-weight:700;font-size:.82rem;color:var(--dk);margin-bottom:6px">Now: MVP + Roadshow</div>
+        <p style="font-size:.8rem;color:var(--t2);line-height:1.5">This dashboard demonstrates value using complementary data and highlights the gaps. We take it to partners and funders to build support for capturing the missing signal.</p>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:.82rem;color:var(--dk);margin-bottom:6px">Phase 1: Validate the Signal ($150–200K, 6 months)</div>
+        <p style="font-size:.8rem;color:var(--t2);line-height:1.5">Test whether direct sentiment can be collected reliably via existing touchpoints. Identify which channels, wording, and delivery moments yield quality data. Determine volume thresholds for stable block-level patterns.</p>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:.82rem;color:var(--dk);margin-bottom:6px">Phase 2: Build the Sensor Network + Correlation Engine</div>
+        <p style="font-size:.8rem;color:var(--t2);line-height:1.5">Scale collection across channels. Combine direct sentiment with complementary data into a correlation machine that identifies what drives the feeling of safety — and where perception is shifting.</p>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:.82rem;color:var(--dk);margin-bottom:6px">Phase 3: Measure Intervention Impact</div>
+        <p style="font-size:.8rem;color:var(--t2);line-height:1.5">Deploy and test interventions — cleaning, lighting, ambassadors, activation — and measure their impact on perception in near-real-time. Optimize resource allocation based on what actually changes how people feel.</p>
+      </div>
+    </div>
   </div>
 
   <div class="mrow">
@@ -529,10 +599,21 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
     </div>
   </div>
 
+  <div class="card" style="border-left:4px solid #27AE60">
+    <div class="h3">What Capturing This Signal Enables</div>
+    <p class="body" style="margin-bottom:10px">When decision-makers can see how people feel — not just what happened — resource deployment gets sharper and outcomes become measurable:</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+      <div style="background:var(--cream);padding:12px;border-radius:6px"><strong style="color:var(--dk);font-size:.82rem">Foot traffic</strong><br><span style="font-size:.78rem;color:var(--t2)">People walk where they feel safe — measuring perception helps target interventions that bring people back</span></div>
+      <div style="background:var(--cream);padding:12px;border-radius:6px"><strong style="color:var(--dk);font-size:.82rem">Spending & tourism</strong><br><span style="font-size:.78rem;color:var(--t2)">Visitors and residents spend more in places that feel welcoming — perception data guides where to invest</span></div>
+      <div style="background:var(--cream);padding:12px;border-radius:6px"><strong style="color:var(--dk);font-size:.82rem">Workers & buildings</strong><br><span style="font-size:.78rem;color:var(--t2)">Workers feeling safer commuting and entering buildings supports return-to-office and commercial recovery</span></div>
+      <div style="background:var(--cream);padding:12px;border-radius:6px"><strong style="color:var(--dk);font-size:.82rem">Investment & residents</strong><br><span style="font-size:.78rem;color:var(--t2)">Measurable improvements in how an area feels attract business investment and residents returning</span></div>
+    </div>
+  </div>
+
   <div class="cta">
-    <h2>Build on the momentum with better data</h2>
-    <p>Crime is down 25%. Optimism is up. But the perception gap persists — and we lack the granular, high-frequency data to understand what's still driving it. Phase 1 tests whether direct sentiment capture through existing digital touchpoints can produce a reliable signal to complement existing data and inform targeted interventions.</p>
-    <div class="cta-b">$150K–$200K · 6 Months · Signal Validation</div>
+    <h2>Build the missing signal</h2>
+    <p>28 complementary data sources show what we can approximate. But the direct, ambient experience of the people who live, work, and visit San Francisco — the component that drives foot traffic, spending, and confidence — goes unmeasured. Phase 1 tests whether we can capture it.</p>
+    <div class="cta-b">$150K–$200K · 6 Months · Validate the Signal</div>
     <div style="margin-top:14px;font-size:.75rem;opacity:.65">City Science Lab San Francisco × MIT Media Lab City Science</div>
   </div>
 </div>
@@ -622,8 +703,9 @@ let map, geoLayer, currentTI=0, playing=false, playIv;
 
 function initMap(){
   map=L.map('map',{
-    center:[37.757,-122.44],
-    zoom:12.4,
+    center:[37.76,-122.44],
+    zoom:12.3,
+    zoomSnap:0.1,
     zoomControl:true,
     attributionControl:false
   });
@@ -696,7 +778,7 @@ function renderGeo(geo){
       });
     }
   }).addTo(map);
-  map.fitBounds(geoLayer.getBounds(),{padding:[10,10],maxZoom:12.4});
+  map.fitBounds(geoLayer.getBounds(),{padding:[10,10],maxZoom:12.3});
 }
 
 document.getElementById('timeSlider').addEventListener('input',function(){
