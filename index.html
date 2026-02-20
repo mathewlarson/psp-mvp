@@ -194,21 +194,23 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <div class="sec">
   <div style="margin-bottom:28px">
     <div style="font-family:var(--ff);font-size:1.5rem;color:var(--dk);line-height:1.3;margin-bottom:6px">"Safety isn't just a statistic; it's a feeling you hold when you're walking down the street."</div>
-    <div style="font-size:.82rem;color:var(--t2)">— Daniel Lurie, Mayor of San Francisco, Inauguration Speech, January 2025</div>
+    <div style="font-size:.82rem;color:var(--t2);margin-bottom:16px">— Daniel Lurie, Mayor of San Francisco, Inauguration Speech, January 2025</div>
+    <div style="font-family:var(--ff);font-size:1.05rem;color:var(--mid);line-height:1.3;margin-bottom:4px">"Crime stats don't tell the whole story. We are always thinking about ways that we can impact the perception of feeling safe."</div>
+    <div style="font-size:.78rem;color:var(--t3)">— Derrick Lew, SFPD Chief of Police, January 2026</div>
   </div>
 
-  <p class="body" style="margin-bottom:20px">San Francisco's reported crime has declined significantly since 2019 — homicides down 45%, robberies down 40%, overall reported crime down roughly 30%. But the share of residents who feel safe walking during the day dropped from 85% to 63% between 2019 and 2023. At night, from 53% to 36%. Crime is down — yet people feel <em>less</em> safe. That gap between incident data and lived experience is the problem Public Safety Pulse exists to close.</p>
+  <p class="body" style="margin-bottom:20px">San Francisco is making real progress. Crime fell 25% in 2025, homicides hit their lowest level since 1954, and 64% of residents now say the city is headed in the right direction. But a perception gap persists: in the most recent City Survey (2023), only 63% felt safe walking during the day — down from 85% in 2019 — and just 36% at night, down from 53%. Even as crime declines, roughly 4 in 10 residents still don't feel safe by day, and nearly two-thirds don't at night. That gap between improving conditions and lingering unease is the opportunity Public Safety Pulse is designed to address — by building the data infrastructure to understand what drives the feeling of safety, not just the statistics.</p>
 
   <div class="mrow">
+    <div class="mc"><div class="mv">25%</div><div class="ml">Crime decline in 2025</div><div class="md">SFPD · Lowest homicides since 1954</div></div>
+    <div class="mc"><div class="mv">64%</div><div class="ml">Say SF on right track</div><div class="md">CityBeat 2026 · Up from 22% in 2024</div></div>
     <div class="mc a"><div class="mv">63%</div><div class="ml">Feel safe walking (day)</div><div class="md">Down from 85% · 2019→2023 City Survey</div></div>
     <div class="mc a"><div class="mv">36%</div><div class="ml">Feel safe walking (night)</div><div class="md">Down from 53% · 2019→2023 City Survey</div></div>
-    <div class="mc"><div class="mv">~30%</div><div class="ml">Overall crime decline</div><div class="md">2019→2025 · SFPD / Advance SF</div></div>
-    <div class="mc"><div class="mv">1.5M+</div><div class="ml">Records analyzed</div><div class="md">28 public data sources</div></div>
   </div>
 
   <div class="ibox">
-    <div class="il">What This MVP Shows — And What It Can't</div>
-    <p>We fused <em>28 public data sources</em> — 311 disorder reports, crime incidents, fire/EMS calls, transit ridership, business activity, streetlight outages, and more — into a composite Safety Perception Index for every SF neighborhood. This is a <em>proxy model</em>: it estimates perceived safety from conditions that research shows correlate with how safe people feel. It is not a direct measurement. The gaps are the point: 311 only captures what people report. Crime data only captures what police file. Areas people avoid appear artificially safe. Phase 1 tests whether we can fill these gaps by asking people directly through existing digital touchpoints.</p>
+    <div class="il">Progress, Gaps, and the Opportunity</div>
+    <p>The trend is real: crime is down, optimism is up, and nearly 6 in 10 voters say crime has gotten better. But the most recent perception data (2023 City Survey) still shows significant unease — especially at night, among older residents, and in specific neighborhoods. <em>We don't yet have the granular, high-frequency data to understand what's driving that remaining gap</em> — or to measure whether specific interventions are closing it. This MVP fuses <em>28 public data sources</em> into a proxy model of perceived safety. It shows what existing data can approximate. Phase 1 tests whether we can build the missing signal: direct, place-based sentiment that complements this data and is specific enough to inform targeted interventions.</p>
   </div>
 
   <div class="cmp">
@@ -230,7 +232,7 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
     </div>
   </div>
 
-  <div style="font-size:.7rem;color:var(--t3);margin-top:12px">Sources: SF City Performance Survey 2019 & 2023 (biennial resident survey), SFPD Incident Reports, Governor's Office Crime Data 2025, Advance SF 2025</div>
+  <div style="font-size:.7rem;color:var(--t3);margin-top:12px">Sources: SF City Performance Survey 2019 & 2023, SFPD 2025 Crime Data, CityBeat 2026 Poll (SF Chamber of Commerce / EMC Research, Jan 2026, n=500), GrowSF July 2025 Poll</div>
 </div>
 </div>
 
@@ -482,7 +484,7 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <div class="pnl" id="p-act">
 <div class="sec">
   <div class="h2">Partner With Us</div>
-  <div class="sub">Phase 1 is a 6-month pilot to test whether direct safety sentiment can be collected reliably through existing digital touchpoints — and whether it produces data specific enough to inform targeted interventions.</div>
+  <div class="sub">San Francisco's safety trajectory is improving — but we still lack the granular data to understand what's driving the remaining perception gap. Phase 1 is a 6-month pilot to test whether direct sentiment can be collected reliably through existing digital touchpoints, and whether it complements existing data to inform targeted interventions.</div>
 
   <div class="ibox">
     <div class="il">The Core Question Phase 1 Answers</div>
@@ -528,8 +530,8 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
   </div>
 
   <div class="cta">
-    <h2>Fund Phase 1 to validate the signal</h2>
-    <p>28 data sources. 1.5 million records. All approximating what one question asked through existing digital touchpoints could measure directly. Phase 1 tests whether that question produces a reliable, actionable signal — and whether it's specific enough to inform targeted interventions.</p>
+    <h2>Build on the momentum with better data</h2>
+    <p>Crime is down 25%. Optimism is up. But the perception gap persists — and we lack the granular, high-frequency data to understand what's still driving it. Phase 1 tests whether direct sentiment capture through existing digital touchpoints can produce a reliable signal to complement existing data and inform targeted interventions.</p>
     <div class="cta-b">$150K–$200K · 6 Months · Signal Validation</div>
     <div style="margin-top:14px;font-size:.75rem;opacity:.65">City Science Lab San Francisco × MIT Media Lab City Science</div>
   </div>
