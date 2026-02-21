@@ -1,0 +1,35 @@
+# Public Safety Pulse MVP — Python Dependencies
+# Install: pip install -r requirements.txt
+
+# Data ingestion & processing
+pandas>=2.0
+requests>=2.31
+sodapy>=2.2          # Socrata Open Data API client (alternative to raw requests)
+pyarrow>=14.0        # Parquet file support
+tqdm>=4.65           # Progress bars
+
+# Geospatial
+geopandas>=0.14
+h3>=4.0              # Uber H3 hexagonal grid system
+shapely>=2.0
+folium>=0.15         # Quick map visualizations
+
+# NLP & Sentiment Analysis
+spacy>=3.7
+textblob>=0.18       # Simple sentiment scoring
+# Optional: transformers>=4.35  # HuggingFace for better NLP (heavy install)
+
+# Visualization & Dashboard
+streamlit>=1.30      # Rapid dashboard prototyping
+plotly>=5.18         # Interactive charts
+pydeck>=0.8          # Deck.gl maps in Python
+altair>=5.2          # Declarative visualization
+
+# Optional: Production dashboard
+# dash>=2.14
+# mapboxgl
+
+# Development
+jupyter>=1.0
+ipywidgets>=8.1
+black>=23.0

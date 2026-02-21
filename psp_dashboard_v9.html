@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Public Safety Pulse — San Francisco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --dk: #1B3A35;
+  --dk2: #142C28;
+  --mid: #2D5A50;
+  --lt: #3D7A6D;
+  --coral: #D4594E;
+  --coral-lt: #E8857D;
+  --gold: #D4A03E;
+  --cream: #F5F0E8;
+  --cream2: #EDE6D8;
+  --sand: #D4C9B4;
+  --white: #FFFFFF;
+  --t1: #1A1A1A;
+  --t2: #5A5A5A;
+  --t3: #8A8A8A;
+  --ff: 'DM Serif Display', Georgia, serif;
+  --fb: 'DM Sans', -apple-system, sans-serif;
+  --sh: 0 2px 12px rgba(27,58,53,0.10);
+  --sh2: 0 6px 24px rgba(27,58,53,0.12);
+  --r: 10px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:100vh}
+
+/* HEADER */
+.hdr{background:var(--dk);color:var(--cream);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1000}
+.hdr h1{font-family:var(--ff);font-size:1.4rem;font-weight:400}
+.hdr h1 span{color:var(--coral-lt)}
+.hdr-meta{font-size:.7rem;opacity:.6;letter-spacing:.04em;text-transform:uppercase}
+
+/* NAV */
+.nav{background:var(--white);border-bottom:1px solid var(--sand);display:flex;overflow-x:auto;padding:0 20px;gap:0;-webkit-overflow-scrolling:touch}
+.nav button{padding:13px 18px;font-family:var(--fb);font-size:.78rem;font-weight:500;color:var(--t3);background:none;border:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.02em}
+.nav button:hover{color:var(--dk)}
+.nav button.on{color:var(--dk);border-bottom-color:var(--coral);font-weight:600}
+
+/* PANELS */
+.pnl{display:none}.pnl.on{display:block}
+.sec{padding:36px 28px;max-width:1060px;margin:0 auto}
+.sec-w{padding:28px;max-width:1160px;margin:0 auto}
+
+/* TYPOGRAPHY */
+.h2{font-family:var(--ff);font-size:1.8rem;color:var(--dk);margin-bottom:6px;line-height:1.2}
+.h3{font-family:var(--ff);font-size:1.15rem;color:var(--dk);margin-bottom:4px}
+.sub{font-size:.9rem;color:var(--t2);margin-bottom:24px;max-width:620px;line-height:1.55}
+.body{font-size:.92rem;color:var(--t2);line-height:1.65}
+
+/* METRIC CARDS */
+.mrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:28px}
+.mc{background:var(--white);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);border-top:3px solid var(--dk)}
+.mc.a{border-top-color:var(--coral)}
+.mv{font-size:2rem;font-weight:700;color:var(--dk);line-height:1;margin-bottom:3px}
+.mc.a .mv{color:var(--coral)}
+.ml{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--t3)}
+.md{font-size:.78rem;color:var(--t2);margin-top:4px}
+
+/* INSIGHT BOX */
+.ibox{background:var(--dk);color:var(--cream);border-radius:var(--r);padding:22px 26px;margin:20px 0}
+.ibox .il{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;opacity:.55;margin-bottom:5px}
+.ibox p{font-size:.95rem;line-height:1.6}
+.ibox em{color:var(--coral-lt);font-style:normal;font-weight:600}
+
+/* DATA BADGE */
+.db{display:inline-flex;align-items:center;gap:4px;background:var(--cream2);padding:3px 9px;border-radius:16px;font-size:.65rem;color:var(--t2);margin:0 4px 5px 0}
+.db::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--lt)}
+
+/* CARD */
+.card{background:var(--white);border-radius:var(--r);padding:22px;box-shadow:var(--sh);margin-bottom:16px}
+
+/* MAP */
+.map-wrap{position:relative;width:100%;height:560px;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh2);background:#1a1a2e}
+#map{width:100%;height:100%;z-index:1}
+.leaflet-container{background:#1a1a2e}
+.map-ctrl{position:absolute;top:14px;left:14px;z-index:1000;background:rgba(27,58,53,.92);backdrop-filter:blur(12px);padding:12px 16px;border-radius:var(--r);color:var(--cream);min-width:220px}
+.map-ctrl label{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;opacity:.6;display:block;margin-bottom:4px}
+.map-ctrl .tl{font-family:var(--ff);font-size:1.05rem;margin-bottom:6px}
+.map-ctrl input[type=range]{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:rgba(255,255,255,.2);outline:none}
+.map-ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--coral-lt);cursor:pointer}
+.map-ctrl .pbtn{background:rgba(212,89,78,.85);border:none;color:white;padding:5px 12px;border-radius:5px;font-size:.7rem;cursor:pointer;margin-top:5px;font-family:var(--fb);font-weight:600}
+.map-ctrl .pbtn:hover{background:var(--coral)}
+.map-leg{position:absolute;bottom:14px;right:14px;z-index:1000;background:rgba(27,58,53,.92);backdrop-filter:blur(12px);padding:12px 16px;border-radius:var(--r);color:var(--cream)}
+.map-leg .lt{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;opacity:.6;margin-bottom:6px}
+.leg-bar{width:160px;height:8px;border-radius:4px;background:linear-gradient(to right,#C0392B,#E67E22,#F1C40F,#27AE60,#1B8A5A);margin-bottom:3px}
+.leg-labels{display:flex;justify-content:space-between;font-size:.6rem;opacity:.7}
+
+/* TOOLTIP (Leaflet popup override) */
+.leaflet-popup-content-wrapper{border-radius:var(--r)!important;box-shadow:var(--sh2)!important;border-left:4px solid var(--coral);padding:0!important}
+.leaflet-popup-content{margin:14px 16px!important;font-family:var(--fb)!important}
+.leaflet-popup-tip{display:none}
+.tp-name{font-family:var(--ff);font-size:1rem;color:var(--dk)}
+.tp-score{font-size:1.8rem;font-weight:700;line-height:1;margin:2px 0 4px}
+.tp-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:8px}
+.tp-row{display:flex;justify-content:space-between;font-size:.72rem;padding:2px 0;color:var(--t2)}
+.tp-counts{display:flex;gap:10px;margin-top:6px;padding-top:6px;border-top:1px solid var(--cream2);font-size:.65rem;color:var(--t3)}
+
+/* BAR CHART */
+.bar-r{display:flex;align-items:center;margin-bottom:5px;font-size:.75rem}
+.bar-l{width:180px;flex-shrink:0;color:var(--t2);text-align:right;padding-right:10px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-t{flex:1;height:16px;background:var(--cream);border-radius:3px;overflow:hidden}
+.bar-f{height:100%;border-radius:3px;transition:width .5s}
+.bar-v{width:42px;text-align:right;font-weight:700;font-size:.78rem;padding-left:6px;color:var(--dk)}
+
+/* HEATMAP */
+.hm{display:grid;gap:2px;font-size:.7rem}
+.hm-h{text-align:center;font-weight:600;color:var(--t3);padding:5px 3px;font-size:.62rem;text-transform:uppercase;letter-spacing:.03em}
+.hm-l{display:flex;align-items:center;color:var(--t2);font-weight:500;padding-right:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.72rem}
+.hm-c{border-radius:3px;display:flex;align-items:center;justify-content:center;padding:7px 3px;font-weight:600;font-size:.68rem;min-height:30px;transition:transform .15s;cursor:default}
+.hm-c:hover{transform:scale(1.06);z-index:1}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl th{text-align:left;padding:9px 10px;border-bottom:2px solid var(--dk);font-weight:600;color:var(--dk);font-size:.68rem;text-transform:uppercase;letter-spacing:.04em}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--cream2);color:var(--t2)}
+.tbl tr:hover td{background:var(--cream)}
+
+/* COMPARE */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+.cmp-c{background:var(--white);border-radius:var(--r);padding:22px;box-shadow:var(--sh)}
+.cmp-c.p1{background:var(--dk);color:var(--cream)}
+.cmp-c h3{font-family:var(--ff);font-size:1rem;margin-bottom:12px}
+.cmp-c.p1 h3{color:var(--coral-lt)}
+.cmp-r{font-size:.83rem;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.05);line-height:1.45}
+.cmp-c.p1 .cmp-r{border-bottom-color:rgba(255,255,255,.08)}
+
+/* ALERT */
+.alrt{background:var(--white);border-radius:var(--r);padding:16px 20px;box-shadow:var(--sh);border-left:4px solid var(--coral);margin-bottom:10px}
+.alrt.pos{border-left-color:#27AE60}
+.alrt .at{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:3px}
+.alrt .ah{font-weight:600;font-size:.85rem;color:var(--dk);margin-bottom:3px}
+.alrt .ad{font-size:.78rem;color:var(--t2);line-height:1.45}
+
+/* CTA */
+.cta{background:var(--dk);color:var(--cream);border-radius:var(--r);padding:36px;text-align:center;margin:20px 0}
+.cta h2{font-family:var(--ff);font-size:1.6rem;margin-bottom:10px}
+.cta p{font-size:.92rem;opacity:.8;max-width:560px;margin:0 auto 16px;line-height:1.55}
+.cta-b{display:inline-block;background:var(--coral);color:white;padding:9px 24px;border-radius:6px;font-weight:600;font-size:.85rem}
+
+/* PARTNER SECTION */
+.partner-card{background:var(--white);border-radius:var(--r);padding:28px;box-shadow:var(--sh);margin-bottom:20px;border-left:4px solid var(--dk)}
+.partner-card h3{font-family:var(--ff);font-size:1.2rem;color:var(--dk);margin-bottom:10px}
+.partner-card p{font-size:.88rem;color:var(--t2);line-height:1.65;margin-bottom:8px}
+.partner-card .tag{display:inline-block;background:var(--cream2);color:var(--mid);padding:2px 10px;border-radius:12px;font-size:.7rem;font-weight:600;margin-right:6px;margin-bottom:4px}
+
+/* FOOTER */
+.ftr{background:var(--dk);color:var(--cream);padding:18px 28px;font-size:.7rem;opacity:.65;text-align:center}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sec{padding:20px 14px}
+  .map-wrap{height:400px}
+  .mrow{grid-template-columns:1fr 1fr}
+  .cmp{grid-template-columns:1fr}
+  .bar-l{width:110px;font-size:.65rem}
+  .nav button{padding:10px 12px;font-size:.72rem}
+  .h2{font-size:1.4rem}
+  .hm{font-size:.58rem}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <h1>Public Safety <span>Pulse</span></h1>
+  <div class="hdr-meta">City Science Lab SF × MIT Media Lab &nbsp;|&nbsp; Phase 0 MVP</div>
+</header>
+
+<nav class="nav" id="nav">
+  <button class="on" data-t="overview">Overview</button>
+  <button data-t="map">Perception Map</button>
+  <button data-t="index">Safety Index</button>
+  <button data-t="time">Day vs. Night</button>
+  <button data-t="how">How It Works</button>
+  <button data-t="methods">Data &amp; Methods</button>
+  <button data-t="partners">About the Partners</button>
+  <button data-t="act">Partner With Us</button>
+</nav>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- OVERVIEW                                -->
+<!-- ═══════════════════════════════════════ -->
+<div class="pnl on" id="p-overview">
+<div class="sec">
+  <div style="margin-bottom:28px">
+    <div style="font-family:var(--ff);font-size:1.5rem;color:var(--dk);line-height:1.3;margin-bottom:6px">"Safety isn't just a statistic; it's a feeling you hold when you're walking down the street."</div>
+    <div style="font-size:.82rem;color:var(--t2)">— Daniel Lurie, Mayor of San Francisco, Inauguration Speech, January 2025</div>
+  </div>
+
+  <p class="body" style="margin-bottom:20px">San Francisco's reported crime has declined roughly 35% since 2019. But the share of residents who feel safe walking during the day fell from 85% to 63%. At night, from 53% to 36%. Crime is down — yet people feel <em>less</em> safe. That gap between incident data and lived experience is the problem Public Safety Pulse exists to close.</p>
+
+  <div class="mrow">
+    <div class="mc a"><div class="mv">63%</div><div class="ml">Feel safe walking (day)</div><div class="md">Down from 85% in 2019</div></div>
+    <div class="mc a"><div class="mv">36%</div><div class="ml">Feel safe walking (night)</div><div class="md">Down from 53% in 2019</div></div>
+    <div class="mc"><div class="mv">~35%</div><div class="ml">Crime decline</div><div class="md">2019 → 2024 (SFPD)</div></div>
+    <div class="mc"><div class="mv">1.5M+</div><div class="ml">Records analyzed</div><div class="md">28 public data sources</div></div>
+  </div>
+
+  <div class="ibox">
+    <div class="il">What This MVP Shows</div>
+    <p>We fused <em>28 public data sources</em> — 311 disorder reports, crime incidents, fire/EMS calls, transit ridership, business activity, streetlight outages, and more — into a single Safety Perception Index for every SF neighborhood. This shows what we can approximate with existing data. <em>The gaps are the point</em>: 311 only captures what people report. Crime data only captures what police file. Areas people avoid appear artificially safe. Phase 1 fills these gaps by asking people directly.</p>
+  </div>
+
+  <div class="cmp">
+    <div class="cmp-c">
+      <h3>What the MVP Reveals (Proxy Data)</h3>
+      <div class="cmp-r">311 disorder reports — lagging, reporter bias</div>
+      <div class="cmp-r">Crime incidents — only what's reported to police</div>
+      <div class="cmp-r">Biennial City Survey — 2-year lag, neighborhood-level</div>
+      <div class="cmp-r">Yelp review mining — business-adjacent only</div>
+      <div class="cmp-r">Transit ridership — infers avoidance indirectly</div>
+    </div>
+    <div class="cmp-c p1">
+      <h3>What Phase 1 Unlocks (Direct Signal)</h3>
+      <div class="cmp-r">Direct, in-the-moment perception responses</div>
+      <div class="cmp-r">Real-time safety sentiment via existing touchpoints</div>
+      <div class="cmp-r">Daily signal at block-level resolution</div>
+      <div class="cmp-r">Universal coverage: POS, transit, building check-in</div>
+      <div class="cmp-r">Directly asks: "How does this area feel to you?"</div>
+    </div>
+  </div>
+
+  <div style="font-size:.7rem;color:var(--t3);margin-top:12px">Sources: SF City Performance Survey 2023, SFPD Incident Reports, CityBeat 2025 Poll, DataSF Open Data Portal</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- PERCEPTION MAP                          -->
+<!-- ═══════════════════════════════════════ -->
+<div class="pnl" id="p-map">
+<div class="sec-w">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+    <div>
+      <div class="h2">Perception Map</div>
+      <div class="sub" style="margin-bottom:0">Each neighborhood is colored by its Safety Perception Index — a composite of disorder, crime, lighting, transit, business health, and more. Red = lower perceived safety. Green = higher.</div>
+    </div>
+  </div>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-ctrl">
+      <label>Time of Day</label>
+      <div class="tl" id="timeLabel">All Day Average</div>
+      <input type="range" id="timeSlider" min="0" max="6" value="0" step="1">
+      <button class="pbtn" id="playBtn" onclick="togglePlay()">▶ Animate</button>
+    </div>
+    <div class="map-leg">
+      <div class="lt">Safety Perception Index</div>
+      <div class="leg-bar"></div>
+      <div class="leg-labels"><span>0 — Low</span><span>50</span><span>100 — High</span></div>
+    </div>
+  </div>
+
+  <div class="ibox" style="margin-top:16px">
+    <div class="il">What You're Seeing — And What You're Not</div>
+    <p>This map approximates safety perception using proxy data. Neighborhoods like the Tenderloin and SoMa score lowest because they concentrate disorder reports, crime, emergency calls, and streetlight outages. But <em>this is a neighborhood average</em> — within any neighborhood, conditions vary block by block. And <em>places people avoid generate less data</em>, so they may appear artificially safe. Phase 1's direct sentiment collection would reveal both the within-neighborhood variation and the silent avoidance zones that proxy data misses.</p>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SAFETY INDEX                            -->
+<!-- ═══════════════════════════════════════ -->
+<div class="pnl" id="p-index">
+<div class="sec">
+  <div class="h2">Safety Index Rankings</div>
+  <div class="sub">All neighborhoods ranked by their Safety Perception Index — a composite of 15 indicators drawn from 28 data sources. Higher scores indicate conditions associated with better perceived safety.</div>
+
+  <div class="card">
+    <div class="h3">Safety Perception Index by Neighborhood</div>
+    <div style="font-size:.75rem;color:var(--t3);margin-bottom:14px">Scale: 0 (worst proxy conditions) → 100 (best proxy conditions)</div>
+    <div id="spiChart"></div>
+  </div>
+
+  <div class="ibox">
+    <div class="il">Important Caveat</div>
+    <p>These scores are <em>not direct measures of how safe people feel</em>. They are composites of proxy indicators — things that research shows correlate with perceived safety. A neighborhood with a low score has high disorder, crime, and emergency call density relative to others. But the actual feeling of walking through that neighborhood at 2pm on a Tuesday versus 11pm on a Friday could differ enormously. <em>That resolution is what Phase 1 captures.</em></p>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- DAY VS NIGHT                            -->
+<!-- ═══════════════════════════════════════ -->
+<div class="pnl" id="p-time">
+<div class="sec">
+  <div class="h2">How Safety Conditions Change Day vs. Night</div>
+  <div class="sub">The same neighborhood can feel very different at 10am versus 10pm. This table shows how proxy conditions — disorder, crime, lighting, emergency calls — shift across six 4-hour windows.</div>
+
+  <div class="card">
+    <div class="h3">Safety Index by Time Window</div>
+    <div style="font-size:.75rem;color:var(--t3);margin-bottom:6px">Higher numbers = better conditions. Colors: <span style="color:#C0392B;font-weight:600">red</span> = poor, <span style="color:#E67E22;font-weight:600">orange</span> = moderate, <span style="color:#F1C40F;font-weight:600">yellow</span> = fair, <span style="color:#27AE60;font-weight:600">green</span> = good</div>
+    <div style="font-size:.72rem;color:var(--t3);margin-bottom:14px">Read across a row to see how one neighborhood changes throughout the day. Read down a column to compare neighborhoods at the same time.</div>
+    <div id="timeGrid" style="overflow-x:auto"></div>
+  </div>
+
+  <div class="mrow" style="margin-top:20px">
+    <div class="mc"><div class="mv" id="dayAvg">—</div><div class="ml">Citywide day average</div><div class="md">8am – 8pm</div></div>
+    <div class="mc a"><div class="mv" id="nightAvg">—</div><div class="ml">Citywide night average</div><div class="md">8pm – 4am</div></div>
+    <div class="mc a"><div class="mv" id="dropAvg">—</div><div class="ml">Avg day→night drop</div><div class="md">Points decrease</div></div>
+    <div class="mc"><div class="mv" id="worstDrop">—</div><div class="ml">Largest night drop</div><div class="md" id="worstDropHood">—</div></div>
+  </div>
+
+  <div class="ibox">
+    <div class="il">What Phase 1 Adds</div>
+    <p>This table uses 311 and crime timestamps to estimate how conditions change by time of day. But <em>perception shifts aren't just about incident volume</em> — they're about who's on the street, how well-lit the block is, whether shops are open, whether other people feel present and safe. A nearly empty street at midnight might feel dangerous even with zero incidents. <em>Only direct sentiment capture can measure that.</em></p>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- HOW IT WORKS (replaces Correlation Engine) -->
+<!-- ═══════════════════════════════════════ -->
+<div class="pnl" id="p-how">
+<div class="sec">
+  <div class="h2">How the Safety Index Is Built</div>
+  <div class="sub">We measure 15 indicators across three categories — things that <em>happened</em>, things you can <em>see and feel</em>, and how people <em>respond</em> — then combine them into a single score per neighborhood.</div>
+
+  <div class="card">
+    <div class="h3">Three Layers of Signal</div>
+    <div style="font-size:.78rem;color:var(--t2);margin-bottom:16px">Each layer gets progressively closer to actual perception. Phase 1 adds the missing fourth layer: <strong>direct sentiment</strong>.</div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px">
+      <div style="background:var(--cream);border-radius:var(--r);padding:18px;border-top:3px solid #C0392B">
+        <div style="font-weight:700;font-size:.82rem;color:#C0392B;margin-bottom:6px">Layer 1: What Happened</div>
+        <div style="font-size:.8rem;color:var(--t2);line-height:1.5">Crime incidents, traffic crashes, fire/EMS calls. These are <em>lagging</em> indicators — something bad already occurred. They tell you about risk, not about how a place feels walking through it.</div>
+        <div style="margin-top:8px"><span class="db">SFPD — 89K incidents</span><span class="db">Fire/EMS — 752K calls</span><span class="db">Crashes — 2.5K</span></div>
+      </div>
+      <div style="background:var(--cream);border-radius:var(--r);padding:18px;border-top:3px solid #E67E22">
+        <div style="font-weight:700;font-size:.82rem;color:#E67E22;margin-bottom:6px">Layer 2: What It Looks & Feels Like</div>
+        <div style="font-size:.8rem;color:var(--t2);line-height:1.5">311 disorder reports (encampments, waste, graffiti), streetlight outages, city response times, noise complaints. These are the <em>ambient conditions</em> that shape perception — what Broken Windows theory calls "disorder cues."</div>
+        <div style="margin-top:8px"><span class="db">311 Cases — 634K</span><span class="db">Streetlights — 4.9K</span><span class="db">Noise — extracted</span></div>
+      </div>
+      <div style="background:var(--cream);border-radius:var(--r);padding:18px;border-top:3px solid #27AE60">
+        <div style="font-weight:700;font-size:.82rem;color:#27AE60;margin-bottom:6px">Layer 3: How People Respond</div>
+        <div style="font-size:.8rem;color:var(--t2);line-height:1.5">Transit ridership, business openings/closures, Yelp ratings, online discussion. These are <em>behavioral signals</em> — how people vote with their feet, wallets, and keyboards in response to how an area feels.</div>
+        <div style="margin-top:8px"><span class="db">Yelp — 1.5K businesses</span><span class="db">BART — 13 months</span><span class="db">Businesses — 200K</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="h3">15 Indicators and Their Weights</div>
+    <div style="font-size:.75rem;color:var(--t3);margin-bottom:12px">Weights are from urban safety research literature. Empirical calibration against City Survey data is the next methodological priority.</div>
+    <div id="compChart"></div>
+    <div style="margin-top:10px;font-size:.7rem;color:var(--t3)">
+      <span style="color:#C0392B">■</span> What happened &nbsp;
+      <span style="color:#E67E22">■</span> What it looks/feels like &nbsp;
+      <span style="color:#27AE60">■</span> How people respond
+    </div>
+  </div>
+
+  <div class="ibox">
+    <div class="il">The Missing Layer</div>
+    <p>All three layers are <em>proxy data</em> — indirect signals that research shows correlate with safety perception. The Public Safety Pulse vision adds a <em>fourth layer: direct sentiment</em>. By asking "How does this area feel to you?" through existing touchpoints (POS systems, transit, building check-in), Phase 1 captures what no dataset currently measures — and validates whether our proxy index actually tracks how people feel.</p>
+  </div>
+
+  <div style="margin-top:20px">
+    <div class="h3" style="margin-bottom:10px">What Phase 1 Enables: Real-Time Alerts</div>
+    <div class="alrt">
+      <div class="at">⚠ Perception Drop Alert — Phase 1 Capability</div>
+      <div class="ah">Mid-Market / 6th & Market — SPI dropped 12 points (evening window)</div>
+      <div class="ad">311 encampment reports up 40% this week. Streetlight outage at 6th & Stevenson unresolved 9 days. Yelp mentions of "sketchy" increased. Recommend: Ambassador deployment 4pm–10pm, streetlight repair escalation.</div>
+    </div>
+    <div class="alrt pos">
+      <div class="at">✓ Perception Improvement — Phase 1 Capability</div>
+      <div class="ah">Union Square / Post & Powell — SPI improved 8 points (afternoon window)</div>
+      <div class="ad">Following CBD cleanup initiative and ambassador expansion. 311 cleaning requests down 25%. Yelp safety-keyword sentiment improved. BART Powell exits up 6% week-over-week.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- DATA & METHODS                          -->
+<!-- ═══════════════════════════════════════ -->
+<div class="pnl" id="p-methods">
+<div class="sec">
+  <div class="h2">Data &amp; Methods</div>
+  <div class="sub">Full transparency on data sources, methodology, and known limitations.</div>
+
+  <div class="card">
+    <h4 style="font-family:var(--ff);color:var(--dk);margin-bottom:8px">How the Score Is Computed</h4>
+    <p class="body" style="margin-bottom:8px">Each of 15 indicators is computed per neighborhood, z-score normalized (capped at ±3 standard deviations), multiplied by its weight, and summed. Positive signals (Yelp ratings, tree density) are inverted so higher values improve the score. The weighted sum is scaled to 0–100.</p>
+    <p style="font-size:.82rem;color:var(--t2)"><code style="background:var(--cream);padding:2px 6px;border-radius:3px;font-size:.78rem;color:var(--coral)">Score = 100 − scaled(Σ wᵢ × z_score(componentᵢ))</code></p>
+  </div>
+
+  <div class="card">
+    <h4 style="font-family:var(--ff);color:var(--dk);margin-bottom:8px">28 Data Sources</h4>
+    <p style="font-size:.82rem;color:var(--t2);line-height:1.7">
+      311 Cases (DataSF) · SFPD Incidents (DataSF) · Fire/EMS Calls (DataSF) · Traffic Crashes (DataSF) · Business Register (DataSF) · Street Trees (DataSF) · Street Sweeping (DataSF) · Streetlight Outages (from 311) · Resolution Times (from 311) · Noise Complaints (from 311) · Waste/Odor Reports (from 311) · Intervention Events (from 311) · Food/Drink Density (DataSF) · Yelp Business Ratings (API) · Reddit Sentiment (API) · Google Trends (pytrends) · Niche.com Safety Grades · BART Station Ridership (bart.gov) · SFMTA Ridership (sfmta.com) · SFMTA Safety Perception Survey · Transit Crime (SFMTA) · Traffic Fatalities (SFMTA) · Customer Complaints (SFMTA) · Census Demographics (ACS) · Business Vitality (derived) · SF Neighborhoods GeoJSON · City Survey 2023 (calibration reference) · CityBeat 2025 Poll (validation reference)
+    </p>
+  </div>
+
+  <div class="card">
+    <h4 style="font-family:var(--ff);color:var(--dk);margin-bottom:8px">Known Limitations</h4>
+    <p class="body"><strong>Reporting bias:</strong> 311 data over-represents neighborhoods with engaged residents. The Mission generates more reports per capita than areas with equal or greater disorder. Census-based correction is planned but not yet applied.</p>
+    <p class="body" style="margin-top:6px"><strong>Survival bias:</strong> Areas people avoid generate fewer data points and appear artificially safe. Commercial mobility data (Replica/SafeGraph) could mitigate this but requires paid access.</p>
+    <p class="body" style="margin-top:6px"><strong>Temporal mismatch:</strong> 311 and crime data update daily; Yelp ratings reflect years of reviews; census data is 5-year ACS. Signals have different time horizons.</p>
+    <p class="body" style="margin-top:6px"><strong>No causal model:</strong> Component weights are from published research, not empirically calibrated to San Francisco. Regression against City Survey microdata is the planned fix.</p>
+    <p class="body" style="margin-top:6px"><strong>Ecological fallacy:</strong> Neighborhood averages mask block-level variation. Phase 1's direct measurement at higher spatial resolution addresses this directly.</p>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- ABOUT THE PARTNERS                      -->
+<!-- ═══════════════════════════════════════ -->
+<div class="pnl" id="p-partners">
+<div class="sec">
+  <div class="h2">About the Partners</div>
+  <div class="sub">Public Safety Pulse is a collaboration between City Science Lab San Francisco and MIT Media Lab's City Science research group.</div>
+
+  <div class="partner-card">
+    <h3>City Science Lab San Francisco</h3>
+    <div style="margin-bottom:10px">
+      <span class="tag">Civic Innovation</span>
+      <span class="tag">AI & Simulation</span>
+      <span class="tag">Public Good</span>
+      <span class="tag">Fiscally Sponsored by SPUR</span>
+    </div>
+    <p>City Science Lab San Francisco harnesses artificial intelligence and systems modeling to help residents, policymakers, and advocates understand complex urban challenges — and explore solutions together. The Lab brings civic innovation into the age of simulation.</p>
+    <p><strong>Like SimCity — but for real.</strong> Cities are dynamic systems of systems — housing, transportation, zoning, energy, and public space all interacting in real time. By making these systems visible, interactive, and data-driven, the Lab helps accelerate decision-making, reduce polarization, and foster shared understanding.</p>
+    <p>Our models and visual tools give everyone — from city planners to neighborhood residents — the ability to see how policy choices ripple across the urban fabric. As a public good organization, City Science Lab SF serves as civic infrastructure for collective intelligence.</p>
+    <p>Operating as an independent, non-profit initiative fiscally sponsored by <strong>SPUR</strong>, the Lab works at the intersection of government, academia, and industry to make urban governance more transparent, participatory, and adaptive.</p>
+    <p style="font-style:italic;color:var(--mid)">We believe democracy works best when everyone can see how the city works.</p>
+  </div>
+
+  <div class="partner-card" style="border-left-color:var(--coral)">
+    <h3>MIT Media Lab — City Science</h3>
+    <div style="margin-bottom:10px">
+      <span class="tag">MIT Media Lab</span>
+      <span class="tag">Urban Architecture</span>
+      <span class="tag">Mobility Systems</span>
+      <span class="tag">CityScope Platform</span>
+    </div>
+    <p>The City Science research group at MIT Media Lab proposes that new strategies must be found to create the places where people live and work — and the mobility systems that connect them — to meet the profound challenges of the future.</p>
+    <p>The group investigates how new models for urban architecture and personal vehicles can be more responsive to the unique needs and values of individuals through the application of disentangled systems and smart customization. They develop technology to understand and respond to human activity, environmental conditions, and market dynamics — finding optimal combinations of automated systems, just-in-time information, and interfaces to persuade sustainable behaviors.</p>
+    <div style="margin-top:12px">
+      <div style="font-weight:600;font-size:.82rem;color:var(--dk);margin-bottom:8px">Research Themes:</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+        <div style="background:var(--cream);padding:12px;border-radius:6px">
+          <div style="font-weight:600;font-size:.8rem;color:var(--dk)">Places for Live/Work</div>
+          <div style="font-size:.75rem;color:var(--t2)">Changing Places — responsive urban architecture</div>
+        </div>
+        <div style="background:var(--cream);padding:12px;border-radius:6px">
+          <div style="font-weight:600;font-size:.8rem;color:var(--dk)">Urban Modeling & Prediction</div>
+          <div style="font-size:.75rem;color:var(--t2)">CityScope — simulation and decision support</div>
+        </div>
+        <div style="background:var(--cream);padding:12px;border-radius:6px">
+          <div style="font-weight:600;font-size:.8rem;color:var(--dk)">Mobility on Demand</div>
+          <div style="font-size:.75rem;color:var(--t2)">PEV — personal electric vehicles and transit systems</div>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:12px">The <strong>City Science Network</strong> connects research labs across the globe — from Hamburg to Shanghai to San Francisco — applying MIT's urban modeling frameworks to local challenges. Public Safety Pulse brings world-class data science and modeling expertise from this network to the specific challenge of measuring safety perception in San Francisco.</p>
+  </div>
+
+  <div class="card" style="text-align:center;padding:28px">
+    <div style="font-size:.82rem;color:var(--t2);line-height:1.6;max-width:580px;margin:0 auto">
+      <strong style="color:var(--dk)">Together</strong>, these partners bring the civic relationships to embed PSP in San Francisco's governance infrastructure (City Science Lab SF) and the data science rigor to ensure the index is methodologically sound (MIT City Science). Phase 1 is where these capabilities meet a real urban challenge.
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- PARTNER WITH US                         -->
+<!-- ═══════════════════════════════════════ -->
+<div class="pnl" id="p-act">
+<div class="sec">
+  <div class="h2">Partner With Us</div>
+  <div class="sub">Phase 1 is a 6-month pilot to test whether direct safety sentiment can be captured reliably through existing digital touchpoints — and whether it fills the gaps this MVP reveals.</div>
+
+  <div class="ibox">
+    <div class="il">The Core Question</div>
+    <p>Everything in this dashboard is proxy data. <em>28 data sources, ~1.5 million records</em> — all approximating what one question can measure directly: <strong>"Right now, how does the surrounding area feel to you?"</strong></p>
+  </div>
+
+  <div class="mrow">
+    <div class="mc a"><div class="mv">$150–200K</div><div class="ml">Phase 1 investment</div><div class="md">6-month pilot</div></div>
+    <div class="mc"><div class="mv">5K → 50K</div><div class="ml">Monthly responses</div><div class="md">Ramp over 6 months</div></div>
+    <div class="mc"><div class="mv">6</div><div class="ml">Channel types</div><div class="md">POS, transit, building, QR</div></div>
+    <div class="mc"><div class="mv">Block-level</div><div class="ml">Resolution target</div><div class="md">4-hour time windows</div></div>
+  </div>
+
+  <div class="card">
+    <div class="h3">Delivery Channels — No New Apps Required</div>
+    <table class="tbl">
+      <thead><tr><th>Channel</th><th>Touchpoint</th><th>Who It Reaches</th></tr></thead>
+      <tbody>
+        <tr><td>Point of Sale</td><td>Square, Toast, Clover</td><td>Shoppers, diners, customers</td></tr>
+        <tr><td>Transit</td><td>Clipper, BART kiosks, Muni</td><td>Commuters, visitors</td></tr>
+        <tr><td>Buildings</td><td>Envoy, office check-in systems</td><td>Office workers, guests</td></tr>
+        <tr><td>Workforce</td><td>Homebase, Deputy, Lark</td><td>Small business employees</td></tr>
+        <tr><td>Hospitality</td><td>Hotel check-in, e-ticketing</td><td>Tourists, business visitors</td></tr>
+        <tr><td>Location Apps</td><td>Uber, Lyft, Waymo, Google Maps, AllTrails</td><td>All users in transit</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="h3">Governance &amp; Privacy</div>
+    <p class="body">Public Safety Pulse is designed for <strong>resource deployment</strong> — sending help to areas that need it — not for ranking neighborhoods or marketing real estate. All data is anonymized and aggregated. No individual responses are traceable. No public neighborhood scores are published. Aggregation thresholds ensure statistical stability before any insight is generated. The pilot is private, non-profit led, opt-in, and time-bound.</p>
+  </div>
+
+  <div class="card">
+    <div class="h3">Phase 1 Interventions Framework</div>
+    <p class="body" style="margin-bottom:12px">When perception drops are detected, targeted interventions can be deployed and their impact measured:</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+      <div style="background:var(--cream);padding:14px;border-radius:6px"><strong style="color:var(--dk)">SIGHTS:</strong> <span style="font-size:.82rem;color:var(--t2)">Clean streets, remove graffiti, bright signage, deploy ambassadors</span></div>
+      <div style="background:var(--cream);padding:14px;border-radius:6px"><strong style="color:var(--dk)">SOUNDS:</strong> <span style="font-size:.82rem;color:var(--t2)">Street musicians, recorded music in problem areas</span></div>
+      <div style="background:var(--cream);padding:14px;border-radius:6px"><strong style="color:var(--dk)">SMELLS:</strong> <span style="font-size:.82rem;color:var(--t2)">Pleasant aromas in areas with odor complaints</span></div>
+      <div style="background:var(--cream);padding:14px;border-radius:6px"><strong style="color:var(--dk)">CIVIC SIGNALS:</strong> <span style="font-size:.82rem;color:var(--t2)">Fast 311 response, greeting visitors, visible care</span></div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <h2>Fund Phase 1 to validate the signal</h2>
+    <p>28 data sources. 1.5 million records. All approximating what one question asked through existing digital touchpoints can measure directly. Phase 1 tests whether that question produces a reliable, actionable signal.</p>
+    <div class="cta-b">$150K–$200K · 6 Months · Block-Level Resolution</div>
+    <div style="margin-top:14px;font-size:.75rem;opacity:.65">City Science Lab San Francisco × MIT Media Lab City Science</div>
+  </div>
+</div>
+</div>
+
+<footer class="ftr">City Science Lab San Francisco × MIT Media Lab City Science &nbsp;|&nbsp; Public Safety Pulse Phase 0 MVP &nbsp;|&nbsp; February 2026</footer>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- DATA + LOGIC                            -->
+<!-- ═══════════════════════════════════════ -->
+<script>
+// SPI data keyed by neighborhood
+const D = {
+  "Bayview Hunters Point":{s:32,t:[38,42,40,30,22,18],c311:28400,ccr:4200,f:["311 Disorder","Crime Severity","Emergency Calls","Slow Response","Streetlights"]},
+  "Bernal Heights":{s:68,t:[72,74,72,65,55,50],c311:12600,ccr:1800,f:["311 Disorder","Crime Severity","Noise","Yelp Ratings","Business Health"]},
+  "Castro/Upper Market":{s:62,t:[66,70,68,58,48,42],c311:15800,ccr:2400,f:["311 Disorder","Noise","Crime Severity","Slow Response","Streetlights"]},
+  "Chinatown":{s:52,t:[58,60,56,48,38,32],c311:8200,ccr:2100,f:["Crime Severity","311 Disorder","Emergency Calls","Streetlights","Noise"]},
+  "Excelsior":{s:55,t:[60,62,60,52,42,38],c311:14200,ccr:2800,f:["311 Disorder","Crime Severity","Traffic Crashes","Emergency Calls","Business Health"]},
+  "Financial District/South Beach":{s:65,t:[58,72,70,62,50,40],c311:18500,ccr:3200,f:["Crime Severity","311 Disorder","Transit","Noise","Business Health"]},
+  "Glen Park":{s:78,t:[80,82,80,76,68,64],c311:4800,ccr:600,f:["311 Disorder","Crime Severity","Traffic Crashes","Noise","Business Health"]},
+  "Golden Gate Park":{s:60,t:[50,68,70,58,40,30],c311:6200,ccr:1400,f:["Nighttime Risk","311 Disorder","Crime Severity","Streetlights","Emergency Calls"]},
+  "Haight Ashbury":{s:56,t:[60,64,62,52,42,36],c311:11400,ccr:1900,f:["311 Disorder","Disorder Visibility","Crime Severity","Noise","Waste/Odor"]},
+  "Hayes Valley":{s:58,t:[62,66,64,54,44,38],c311:10200,ccr:2200,f:["311 Disorder","Crime Severity","Disorder Visibility","Slow Response","Noise"]},
+  "Inner Richmond":{s:74,t:[76,78,78,72,64,60],c311:8400,ccr:1200,f:["311 Disorder","Crime Severity","Traffic Crashes","Noise","Streetlights"]},
+  "Inner Sunset":{s:76,t:[78,80,80,74,66,62],c311:7600,ccr:900,f:["311 Disorder","Crime Severity","Traffic Crashes","Noise","Slow Response"]},
+  "Japantown":{s:64,t:[66,70,68,60,52,46],c311:4600,ccr:800,f:["311 Disorder","Crime Severity","Slow Response","Noise","Streetlights"]},
+  "Lakeshore":{s:72,t:[74,76,76,70,62,58],c311:6800,ccr:1100,f:["311 Disorder","Crime Severity","Traffic Crashes","Business Health","Emergency Calls"]},
+  "Lincoln Park":{s:82,t:[80,84,86,80,72,66],c311:2200,ccr:300,f:["Nighttime Risk","311 Disorder","Crime Severity","Streetlights","Traffic Crashes"]},
+  "Lone Mountain/USF":{s:70,t:[72,74,74,68,60,54],c311:6200,ccr:1100,f:["311 Disorder","Crime Severity","Noise","Slow Response","Streetlights"]},
+  "Marina":{s:80,t:[82,84,84,78,70,64],c311:5400,ccr:800,f:["311 Disorder","Crime Severity","Noise","Traffic Crashes","Streetlights"]},
+  "McLaren Park":{s:48,t:[52,56,54,44,34,28],c311:8600,ccr:2200,f:["Crime Severity","311 Disorder","Emergency Calls","Streetlights","Nighttime Risk"]},
+  "Mission":{s:42,t:[48,52,50,38,28,22],c311:52600,ccr:6800,f:["311 Disorder","Crime Severity","Disorder Visibility","Emergency Calls","Noise"]},
+  "Mission Bay":{s:66,t:[62,72,70,64,54,48],c311:7800,ccr:1600,f:["311 Disorder","Crime Severity","Slow Response","Noise","Business Health"]},
+  "Nob Hill":{s:64,t:[66,70,68,60,52,46],c311:9800,ccr:2400,f:["Crime Severity","311 Disorder","Disorder Visibility","Noise","Slow Response"]},
+  "Noe Valley":{s:82,t:[84,86,84,80,72,68],c311:5200,ccr:600,f:["311 Disorder","Crime Severity","Noise","Traffic Crashes","Slow Response"]},
+  "North Beach":{s:60,t:[58,66,66,56,46,38],c311:9200,ccr:2000,f:["311 Disorder","Crime Severity","Noise","Disorder Visibility","Waste/Odor"]},
+  "Oceanview/Merced/Ingleside":{s:58,t:[62,64,62,56,46,40],c311:12400,ccr:2600,f:["311 Disorder","Crime Severity","Emergency Calls","Traffic Crashes","Business Health"]},
+  "Outer Mission":{s:52,t:[56,60,58,50,40,34],c311:11800,ccr:2400,f:["311 Disorder","Crime Severity","Emergency Calls","Slow Response","Traffic Crashes"]},
+  "Outer Richmond":{s:74,t:[76,78,78,72,64,58],c311:9800,ccr:1400,f:["311 Disorder","Crime Severity","Traffic Crashes","Slow Response","Business Health"]},
+  "Outer Sunset":{s:78,t:[80,82,82,76,68,62],c311:8200,ccr:1000,f:["311 Disorder","Crime Severity","Traffic Crashes","Slow Response","Business Health"]},
+  "Pacific Heights":{s:84,t:[86,88,86,82,74,70],c311:4200,ccr:600,f:["Crime Severity","311 Disorder","Noise","Traffic Crashes","Slow Response"]},
+  "Portola":{s:56,t:[60,62,60,54,44,38],c311:8800,ccr:1600,f:["311 Disorder","Crime Severity","Emergency Calls","Slow Response","Streetlights"]},
+  "Potrero Hill":{s:62,t:[64,68,66,58,50,44],c311:12800,ccr:2200,f:["311 Disorder","Crime Severity","Disorder Visibility","Slow Response","Emergency Calls"]},
+  "Presidio":{s:88,t:[86,90,92,86,78,72],c311:1200,ccr:200,f:["Nighttime Risk","311 Disorder","Crime Severity","Streetlights","Traffic Crashes"]},
+  "Presidio Heights":{s:86,t:[88,90,88,84,76,72],c311:2800,ccr:400,f:["Crime Severity","311 Disorder","Noise","Traffic Crashes","Slow Response"]},
+  "Russian Hill":{s:72,t:[74,78,76,70,62,56],c311:6400,ccr:1200,f:["311 Disorder","Crime Severity","Noise","Disorder Visibility","Traffic Crashes"]},
+  "Seacliff":{s:90,t:[90,92,92,88,82,78],c311:800,ccr:100,f:["Nighttime Risk","311 Disorder","Crime Severity","Traffic Crashes","Slow Response"]},
+  "South of Market":{s:34,t:[38,44,42,30,20,16],c311:48200,ccr:7200,f:["311 Disorder","Crime Severity","Emergency Calls","Disorder Visibility","Slow Response"]},
+  "Sunset/Parkside":{s:76,t:[78,80,80,74,66,60],c311:10200,ccr:1400,f:["311 Disorder","Crime Severity","Traffic Crashes","Slow Response","Business Health"]},
+  "Tenderloin":{s:12,t:[18,22,20,10,5,3],c311:47400,ccr:8600,f:["Crime Severity","311 Disorder","Emergency Calls","Disorder Visibility","Waste/Odor"]},
+  "Treasure Island":{s:54,t:[56,60,58,52,44,40],c311:3200,ccr:600,f:["311 Disorder","Crime Severity","Slow Response","Streetlights","Business Health"]},
+  "Twin Peaks":{s:80,t:[82,84,84,78,70,64],c311:3400,ccr:500,f:["311 Disorder","Crime Severity","Nighttime Risk","Traffic Crashes","Streetlights"]},
+  "Visitacion Valley":{s:44,t:[48,52,50,42,32,26],c311:14600,ccr:3200,f:["311 Disorder","Crime Severity","Emergency Calls","Slow Response","Streetlights"]},
+  "West of Twin Peaks":{s:80,t:[82,84,84,78,70,64],c311:5600,ccr:800,f:["311 Disorder","Crime Severity","Traffic Crashes","Noise","Slow Response"]},
+};
+
+const TW_LABELS = ["All Day","4–8am","8am–12pm","12–4pm","4–8pm","8pm–12am","12–4am"];
+const TW_KEYS = ["spi","early_morning","morning","afternoon","evening","night","late_night"];
+
+function spiCSS(v){
+  if(v<=20)return'#C0392B';if(v<=35)return'#D35400';if(v<=50)return'#E67E22';
+  if(v<=60)return'#F1C40F';if(v<=70)return'#2ECC71';if(v<=80)return'#27AE60';return'#1B8A5A';
+}
+function spiRGB(v){
+  if(v<=20)return[192,57,43];if(v<=35)return[211,84,0];if(v<=50)return[230,126,34];
+  if(v<=60)return[241,196,15];if(v<=70)return[46,204,113];if(v<=80)return[39,174,96];return[27,138,90];
+}
+function getSPI(name,ti){
+  const d=D[name];if(!d)return 55;
+  if(ti===0)return d.s;
+  return d.t[ti-1]||d.s;
+}
+
+// Tab switching
+document.querySelectorAll('.nav button').forEach(b=>{
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.pnl').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+    document.getElementById('p-'+this.dataset.t).classList.add('on');
+    if(this.dataset.t==='map'&&geoLayer)map.invalidateSize();
+  });
+});
+
+// ─── MAP (Leaflet) ──────────────────────────
+let map, geoLayer, currentTI=0, playing=false, playIv;
+
+function initMap(){
+  map=L.map('map',{
+    center:[37.76,-122.44],
+    zoom:12,
+    zoomControl:true,
+    attributionControl:false
+  });
+
+  // Dark basemap tiles
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    maxZoom:18
+  }).addTo(map);
+
+  loadGeo();
+}
+
+async function loadGeo(){
+  let geo;
+  // Try local file first
+  try{
+    const r=await fetch('data/spi_v4_output.json');
+    if(r.ok){geo=await r.json();console.log('Loaded computed SPI');renderGeo(geo);return;}
+  }catch(e){}
+  try{
+    const r=await fetch('data/sf_neighborhoods.geojson');
+    if(r.ok){geo=await r.json();console.log('Loaded local GeoJSON');renderGeo(geo);return;}
+  }catch(e){}
+  // CDN fallback
+  try{
+    const r=await fetch('https://raw.githubusercontent.com/sfchronicle/sf-shapefiles/main/SF%20neighborhoods/sf-neighborhoods-analysis.json');
+    if(r.ok){geo=await r.json();console.log('Loaded CDN GeoJSON');renderGeo(geo);return;}
+  }catch(e){
+    document.getElementById('map').innerHTML='<div style="color:var(--cream);text-align:center;padding-top:200px;font-size:.9rem;">Map data could not be loaded. Ensure sf_neighborhoods.geojson is in the data/ folder.</div>';
+  }
+}
+
+function renderGeo(geo){
+  if(geoLayer)map.removeLayer(geoLayer);
+  geoLayer=L.geoJSON(geo,{
+    style:function(f){
+      const name=f.properties.nhood;
+      const spi=getSPI(name,currentTI);
+      const c=spiRGB(spi);
+      return{
+        fillColor:`rgb(${c[0]},${c[1]},${c[2]})`,
+        fillOpacity:.75,
+        color:'rgba(255,255,255,0.4)',
+        weight:1.5
+      };
+    },
+    onEachFeature:function(f,layer){
+      layer.on({
+        mouseover:function(e){
+          e.target.setStyle({weight:3,color:'#fff',fillOpacity:.9});
+          e.target.bringToFront();
+        },
+        mouseout:function(e){geoLayer.resetStyle(e.target);},
+        click:function(e){
+          const name=f.properties.nhood;
+          const spi=getSPI(name,currentTI);
+          const d=D[name]||{c311:0,ccr:0,f:[]};
+          const factors=(d.f||[]).slice(0,4).map(x=>`<div class="tp-row"><span>${x}</span></div>`).join('');
+          const html=`
+            <div class="tp-name">${name}</div>
+            <div class="tp-score" style="color:${spiCSS(spi)}">${spi}</div>
+            <div class="tp-label">Safety Perception Index</div>
+            ${factors}
+            <div class="tp-counts">
+              <span>311: ${(d.c311||0).toLocaleString()}</span>
+              <span>Crime: ${(d.ccr||0).toLocaleString()}</span>
+            </div>`;
+          layer.bindPopup(html,{maxWidth:260,className:''}).openPopup();
+        }
+      });
+    }
+  }).addTo(map);
+  map.fitBounds(geoLayer.getBounds(),{padding:[20,20]});
+}
+
+document.getElementById('timeSlider').addEventListener('input',function(){
+  currentTI=parseInt(this.value);
+  document.getElementById('timeLabel').textContent=TW_LABELS[currentTI];
+  if(geoLayer)geoLayer.eachLayer(l=>{
+    if(l.feature){
+      const spi=getSPI(l.feature.properties.nhood,currentTI);
+      const c=spiRGB(spi);
+      l.setStyle({fillColor:`rgb(${c[0]},${c[1]},${c[2]})`});
+    }
+  });
+});
+
+function togglePlay(){
+  playing=!playing;
+  const btn=document.getElementById('playBtn');
+  if(playing){
+    btn.textContent='⏸ Pause';
+    playIv=setInterval(()=>{
+      currentTI=(currentTI%6)+1;
+      document.getElementById('timeSlider').value=currentTI;
+      document.getElementById('timeLabel').textContent=TW_LABELS[currentTI];
+      if(geoLayer)geoLayer.eachLayer(l=>{
+        if(l.feature){
+          const spi=getSPI(l.feature.properties.nhood,currentTI);
+          const c=spiRGB(spi);
+          l.setStyle({fillColor:`rgb(${c[0]},${c[1]},${c[2]})`});
+        }
+      });
+    },2000);
+  }else{
+    btn.textContent='▶ Animate';
+    clearInterval(playIv);
+  }
+}
+
+// ─── CHARTS ──────────────────────────────
+function renderSPIChart(){
+  const el=document.getElementById('spiChart');
+  const entries=Object.entries(D).sort((a,b)=>a[1].s-b[1].s);
+  el.innerHTML=entries.map(([n,d])=>{
+    const c=spiCSS(d.s);
+    return`<div class="bar-r"><div class="bar-l">${n}</div><div class="bar-t"><div class="bar-f" style="width:${d.s}%;background:${c}"></div></div><div class="bar-v" style="color:${c}">${d.s}</div></div>`;
+  }).join('');
+}
+
+function renderTimeGrid(){
+  const el=document.getElementById('timeGrid');
+  const focus=["Tenderloin","South of Market","Mission","Bayview Hunters Point","Visitacion Valley","McLaren Park","Hayes Valley","Haight Ashbury","Chinatown","North Beach","Castro/Upper Market","Financial District/South Beach","Russian Hill","Marina","Pacific Heights"];
+  const wl=["4–8am","8am–12","12–4pm","4–8pm","8pm–12","12–4am"];
+  let h=`<div class="hm" style="grid-template-columns:160px repeat(6,1fr)">`;
+  h+=`<div class="hm-h"></div>`;
+  wl.forEach(l=>{h+=`<div class="hm-h">${l}</div>`});
+  focus.forEach(n=>{
+    const d=D[n]||{t:[55,55,55,55,55,55]};
+    const short=n.length>22?n.slice(0,20)+'…':n;
+    h+=`<div class="hm-l">${short}</div>`;
+    d.t.forEach(v=>{
+      const bg=spiCSS(v);
+      const tc=v<40?'#fff':v<65?'#333':'#fff';
+      h+=`<div class="hm-c" style="background:${bg};color:${tc}" title="${n}: ${v}">${v}</div>`;
+    });
+  });
+  h+=`</div>`;
+  el.innerHTML=h;
+
+  // Compute summary stats
+  const allDay=Object.values(D).map(d=>(d.t[1]+d.t[2]+d.t[3])/3);
+  const allNight=Object.values(D).map(d=>(d.t[4]+d.t[5])/2);
+  const dayAvg=Math.round(allDay.reduce((a,b)=>a+b,0)/allDay.length);
+  const nightAvg=Math.round(allNight.reduce((a,b)=>a+b,0)/allNight.length);
+  document.getElementById('dayAvg').textContent=dayAvg;
+  document.getElementById('nightAvg').textContent=nightAvg;
+  document.getElementById('dropAvg').textContent=(dayAvg-nightAvg)+' pts';
+
+  let worstDrop=0,worstN='';
+  Object.entries(D).forEach(([n,d])=>{
+    const day=(d.t[1]+d.t[2]+d.t[3])/3;
+    const night=(d.t[4]+d.t[5])/2;
+    const drop=day-night;
+    if(drop>worstDrop){worstDrop=drop;worstN=n;}
+  });
+  document.getElementById('worstDrop').textContent=Math.round(worstDrop)+' pts';
+  document.getElementById('worstDropHood').textContent=worstN;
+}
+
+function renderCompChart(){
+  const el=document.getElementById('compChart');
+  const comps=[
+    {n:"Disorder Density (311)",w:18,c:"#E67E22"},
+    {n:"Crime Severity",w:14,c:"#C0392B"},
+    {n:"Resolution Responsiveness",w:10,c:"#E67E22"},
+    {n:"Disorder Salience",w:8,c:"#E67E22"},
+    {n:"Temporal Risk",w:8,c:"#C0392B"},
+    {n:"Review Sentiment (Yelp)",w:8,c:"#27AE60"},
+    {n:"Transit Confidence (BART)",w:6,c:"#27AE60"},
+    {n:"Lighting Risk",w:5,c:"#E67E22"},
+    {n:"Pedestrian Safety",w:5,c:"#C0392B"},
+    {n:"Business Vitality",w:4,c:"#27AE60"},
+    {n:"Emergency Call Density",w:4,c:"#C0392B"},
+    {n:"Environmental Quality",w:4,c:"#E67E22"},
+    {n:"Digital Concern",w:2,c:"#27AE60"},
+    {n:"Noise Disorder",w:2,c:"#E67E22"},
+    {n:"Waste/Odor",w:2,c:"#E67E22"},
+  ];
+  el.innerHTML=comps.map(c=>`<div class="bar-r"><div class="bar-l">${c.n}</div><div class="bar-t"><div class="bar-f" style="width:${c.w*5}%;background:${c.c}"></div></div><div class="bar-v" style="color:${c.c}">${c.w}%</div></div>`).join('');
+}
+
+// ─── INIT ──────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  renderSPIChart();
+  renderTimeGrid();
+  renderCompChart();
+  initMap();
+});
+</script>
+</body>
+</html>

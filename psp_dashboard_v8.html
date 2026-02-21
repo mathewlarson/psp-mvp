@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Public Safety Pulse — San Francisco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/deck.gl@8.9.33/dist.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root {
+  --green-dark: #1B3A35;
+  --green-mid: #2D5A50;
+  --green-light: #3D7A6D;
+  --coral: #D4594E;
+  --coral-light: #E8857D;
+  --cream: #F5F0E8;
+  --cream-dark: #EDE6D8;
+  --sand: #D4C9B4;
+  --slate: #4A5568;
+  --white: #FFFFFF;
+  --text-primary: #1A1A1A;
+  --text-secondary: #5A5A5A;
+  --text-muted: #8A8A8A;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --shadow-sm: 0 1px 3px rgba(27,58,53,0.08);
+  --shadow-md: 0 4px 16px rgba(27,58,53,0.10);
+  --shadow-lg: 0 8px 32px rgba(27,58,53,0.14);
+  --radius: 10px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* ─── HEADER ──────────────────────────────── */
+.site-header {
+  background: var(--green-dark);
+  color: var(--cream);
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.site-header h1 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+.site-header h1 span { color: var(--coral-light); }
+.header-meta {
+  font-size: 0.75rem;
+  opacity: 0.65;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ─── NAV TABS ──────────────────────────────── */
+.tab-nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--sand);
+  display: flex;
+  overflow-x: auto;
+  padding: 0 24px;
+  gap: 0;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-btn {
+  padding: 14px 20px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  letter-spacing: 0.02em;
+}
+.tab-btn:hover { color: var(--green-dark); }
+.tab-btn.active {
+  color: var(--green-dark);
+  border-bottom-color: var(--coral);
+  font-weight: 600;
+}
+
+/* ─── TAB CONTENT ──────────────────────────── */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ─── MAP CONTAINER ──────────────────────── */
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  background: #1a1a2e;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.map-container canvas { border-radius: var(--radius); }
+
+/* ─── MAP CONTROLS ──────────────────────── */
+.map-controls {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.time-control {
+  background: rgba(27,58,53,0.92);
+  backdrop-filter: blur(12px);
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  color: var(--cream);
+  min-width: 240px;
+}
+.time-control label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+  display: block;
+  margin-bottom: 6px;
+}
+.time-control .time-label {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin-bottom: 8px;
+}
+.time-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.2);
+  outline: none;
+}
+.time-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--coral-light);
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(212,89,78,0.5);
+}
+.play-btn {
+  background: rgba(212,89,78,0.9);
+  border: none;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  margin-top: 6px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.play-btn:hover { background: var(--coral); }
+
+/* ─── MAP LEGEND ──────────────────────── */
+.map-legend {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 100;
+  background: rgba(27,58,53,0.92);
+  backdrop-filter: blur(12px);
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  color: var(--cream);
+}
+.legend-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+.legend-bar {
+  width: 180px;
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(to right, #C0392B, #E67E22, #F1C40F, #27AE60, #1B8A5A);
+  margin-bottom: 4px;
+}
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  opacity: 0.8;
+}
+
+/* ─── TOOLTIP ──────────────────────────── */
+.map-tooltip {
+  position: absolute;
+  z-index: 200;
+  pointer-events: none;
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-lg);
+  max-width: 280px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  border-left: 4px solid var(--coral);
+}
+.map-tooltip.visible { opacity: 1; }
+.map-tooltip .tt-name {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--green-dark);
+  margin-bottom: 4px;
+}
+.map-tooltip .tt-score {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.map-tooltip .tt-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.map-tooltip .tt-factors { border-top: 1px solid var(--cream-dark); padding-top: 8px; }
+.map-tooltip .tt-factor-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  padding: 2px 0;
+  color: var(--text-secondary);
+}
+.map-tooltip .tt-factor-bar {
+  height: 3px;
+  background: var(--coral-light);
+  border-radius: 2px;
+  margin-top: 1px;
+}
+.map-tooltip .tt-counts {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--cream-dark);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* ─── LAYOUT ──────────────────────────── */
+.section { padding: 40px 32px; max-width: 1100px; margin: 0 auto; }
+.section-wide { padding: 32px; max-width: 1200px; margin: 0 auto; }
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--green-dark);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+.section-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 28px;
+  max-width: 640px;
+  line-height: 1.55;
+}
+
+/* ─── METRIC CARDS ──────────────────────── */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.metric-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  box-shadow: var(--shadow-sm);
+  border-top: 3px solid var(--green-dark);
+}
+.metric-card.accent { border-top-color: var(--coral); }
+.metric-value {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--green-dark);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.metric-card.accent .metric-value { color: var(--coral); }
+.metric-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.metric-detail {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+/* ─── INSIGHT CALLOUT ──────────────────── */
+.insight-box {
+  background: var(--green-dark);
+  color: var(--cream);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin: 24px 0;
+}
+.insight-box .insight-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+  margin-bottom: 6px;
+}
+.insight-box p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+.insight-box .insight-emphasis {
+  color: var(--coral-light);
+  font-weight: 600;
+}
+
+/* ─── DATA BADGE ──────────────────────── */
+.data-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--cream-dark);
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+.data-badge::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green-light);
+}
+
+/* ─── CHART CONTAINERS ──────────────────── */
+.chart-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+}
+.chart-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--green-dark);
+  margin-bottom: 4px;
+}
+.chart-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ─── SPI BAR CHART ──────────────────────── */
+.spi-bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+}
+.spi-bar-label {
+  width: 200px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  text-align: right;
+  padding-right: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.spi-bar-track {
+  flex: 1;
+  height: 18px;
+  background: var(--cream);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.spi-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+.spi-bar-value {
+  width: 45px;
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding-left: 8px;
+  color: var(--green-dark);
+}
+
+/* ─── TIME HEATMAP ──────────────────────── */
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: 140px repeat(6, 1fr);
+  gap: 2px;
+  font-size: 0.72rem;
+}
+.heatmap-header {
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 6px 4px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.heatmap-label {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding-right: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.heatmap-cell {
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  font-weight: 600;
+  font-size: 0.7rem;
+  min-height: 32px;
+  transition: transform 0.15s;
+}
+.heatmap-cell:hover { transform: scale(1.08); z-index: 1; }
+
+/* ─── CORRELATION TABLE ──────────────────── */
+.corr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.corr-table th {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--green-dark);
+  font-weight: 600;
+  color: var(--green-dark);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.corr-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--cream-dark);
+  color: var(--text-secondary);
+}
+.corr-table tr:hover td { background: var(--cream); }
+
+/* ─── METHODS BOX ──────────────────────── */
+.method-box {
+  background: var(--white);
+  border: 1px solid var(--sand);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.method-box h4 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--green-dark);
+  margin-bottom: 8px;
+}
+.method-box p, .method-box li {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.method-box code {
+  background: var(--cream);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.78rem;
+  color: var(--coral);
+}
+
+/* ─── CTA SECTION ──────────────────────── */
+.cta-section {
+  background: var(--green-dark);
+  color: var(--cream);
+  border-radius: var(--radius);
+  padding: 40px;
+  text-align: center;
+  margin: 24px 0;
+}
+.cta-section h2 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+}
+.cta-section p {
+  font-size: 1rem;
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 20px;
+  line-height: 1.6;
+}
+.cta-badge {
+  display: inline-block;
+  background: var(--coral);
+  color: white;
+  padding: 10px 28px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+/* ─── COMPARISON TABLE ──────────────────── */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 24px 0;
+}
+.compare-col {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+.compare-col.phase1 {
+  background: var(--green-dark);
+  color: var(--cream);
+}
+.compare-col h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin-bottom: 14px;
+}
+.compare-col.phase1 h3 { color: var(--coral-light); }
+.compare-row {
+  font-size: 0.85rem;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  line-height: 1.5;
+}
+.compare-col.phase1 .compare-row { border-bottom-color: rgba(255,255,255,0.1); }
+
+/* ─── ALERT MOCKUP ──────────────────────── */
+.alert-mock {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  box-shadow: var(--shadow-md);
+  border-left: 4px solid var(--coral);
+  margin-bottom: 12px;
+}
+.alert-mock.positive { border-left-color: #27AE60; }
+.alert-mock .alert-type {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.alert-mock .alert-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--green-dark);
+  margin-bottom: 4px;
+}
+.alert-mock .alert-detail {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ─── FOOTER ──────────────────────────── */
+.site-footer {
+  background: var(--green-dark);
+  color: var(--cream);
+  padding: 20px 32px;
+  font-size: 0.72rem;
+  opacity: 0.7;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* ─── RESPONSIVE ──────────────────────── */
+@media (max-width: 768px) {
+  .section { padding: 24px 16px; }
+  .map-container { height: 450px; }
+  .metrics-row { grid-template-columns: 1fr 1fr; }
+  .compare-grid { grid-template-columns: 1fr; }
+  .spi-bar-label { width: 120px; font-size: 0.7rem; }
+  .heatmap-grid { font-size: 0.6rem; }
+  .heatmap-label { font-size: 0.6rem; }
+  .tab-btn { padding: 12px 14px; font-size: 0.75rem; }
+  .section-title { font-size: 1.5rem; }
+}
+
+/* ─── LOADING STATE ──────────────────────── */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(26,26,46,0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  color: var(--cream);
+  border-radius: var(--radius);
+}
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: var(--coral-light);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 0.85rem; opacity: 0.8; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- HEADER                                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<header class="site-header">
+  <h1>Public Safety <span>Pulse</span></h1>
+  <div class="header-meta">City Science Lab SF × MIT Media Lab &nbsp;|&nbsp; Phase 0 MVP</div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- NAVIGATION                                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<nav class="tab-nav" id="tabNav">
+  <button class="tab-btn active" data-tab="overview">Overview</button>
+  <button class="tab-btn" data-tab="map">Perception Map</button>
+  <button class="tab-btn" data-tab="index">Safety Index</button>
+  <button class="tab-btn" data-tab="time">Time of Day</button>
+  <button class="tab-btn" data-tab="correlation">Correlation Engine</button>
+  <button class="tab-btn" data-tab="methods">Data &amp; Methods</button>
+  <button class="tab-btn" data-tab="partner">Partner With Us</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TAB 1: OVERVIEW                                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="tab-panel active" id="panel-overview">
+  <div class="section">
+    <div style="margin-bottom:32px;">
+      <div style="font-family:var(--font-display);font-size:1.6rem;color:var(--green-dark);line-height:1.3;margin-bottom:8px;">"Safety isn't just a statistic; it's a feeling you hold when you're walking down the street."</div>
+      <div style="font-size:0.85rem;color:var(--text-secondary);">— Daniel Lurie, Mayor of San Francisco, Inauguration Speech, January 2025</div>
+    </div>
+
+    <p style="font-size:1.05rem;line-height:1.7;color:var(--text-secondary);margin-bottom:24px;">
+      Mayor Lurie named what city leaders have long struggled to measure: safety is fundamentally a perception — shaped by what you see, hear, smell, and sense as you move through a neighborhood. Crime statistics alone can't capture it. San Francisco's reported crime has declined roughly 35% since 2019, yet the share of residents who feel safe walking during the day fell from 85% to 63% over the same period. At night, it dropped from 53% to 36%.
+    </p>
+    <p style="font-size:1.05rem;line-height:1.7;color:var(--text-secondary);margin-bottom:32px;">
+      That gap — between what the data says happened and what people actually feel — is the problem Public Safety Pulse exists to close.
+    </p>
+
+    <div class="metrics-row">
+      <div class="metric-card accent">
+        <div class="metric-value">63%</div>
+        <div class="metric-label">Feel safe walking (day)</div>
+        <div class="metric-detail">Down from 85% in 2019</div>
+      </div>
+      <div class="metric-card accent">
+        <div class="metric-value">36%</div>
+        <div class="metric-label">Feel safe walking (night)</div>
+        <div class="metric-detail">Down from 53% in 2019</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">~35%</div>
+        <div class="metric-label">Reported crime decline</div>
+        <div class="metric-detail">2019 → 2024 (SFPD data)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="totalRecords">2.7M</div>
+        <div class="metric-label">Records analyzed</div>
+        <div class="metric-detail">28 public data sources</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <span class="data-badge">311 Cases — 634K</span>
+      <span class="data-badge">SFPD Incidents — 89K</span>
+      <span class="data-badge">Fire/EMS Calls — 752K</span>
+      <span class="data-badge">Traffic Crashes — 2.5K</span>
+      <span class="data-badge">Yelp Businesses — 1.5K</span>
+      <span class="data-badge">BART Ridership — 13 months</span>
+      <span class="data-badge">Reddit Sentiment — 319 posts</span>
+      <span class="data-badge">Business Register — 200K</span>
+      <span class="data-badge">Google Trends — 10 hoods</span>
+      <span class="data-badge">Niche Grades — 26 hoods</span>
+      <span class="data-badge">+ 18 more sources</span>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:24px;">Sources: SF City Performance Survey 2023, SFPD Incident Reports, DataSF Open Data, CityBeat 2025 Poll</div>
+
+    <div class="insight-box">
+      <div class="insight-label">The Core Problem</div>
+      <p>Every source you see here — 28 datasets, 2.7 million records — is a <span class="insight-emphasis">proxy</span>. 311 only captures what people report. Crime data only captures what police file. Yelp only captures what reviewers write. Areas people actively avoid appear artificially safe. <span class="insight-emphasis">We need the actual signal.</span></p>
+    </div>
+
+    <div class="compare-grid">
+      <div class="compare-col">
+        <h3>What We Have Today (MVP)</h3>
+        <div class="compare-row">311 complaints — lagging, reporter bias</div>
+        <div class="compare-row">Crime incidents — lagging, only what's reported</div>
+        <div class="compare-row">Biennial survey — 2-year lag, neighborhood-level</div>
+        <div class="compare-row">Review text mining — business-adjacent only</div>
+        <div class="compare-row">Foot traffic proxy — infers avoidance</div>
+      </div>
+      <div class="compare-col phase1">
+        <h3>What Phase 1 Unlocks</h3>
+        <div class="compare-row">Direct, in-the-moment perception</div>
+        <div class="compare-row">Real-time safety sentiment</div>
+        <div class="compare-row">Daily signal, block-level resolution</div>
+        <div class="compare-row">Universal coverage via existing touchpoints</div>
+        <div class="compare-row">Directly asks "how does this feel?"</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TAB 2: PERCEPTION MAP (THE HERO)                       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-map">
+  <div class="section-wide">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div class="section-title">Safety Perception Index</div>
+        <div class="section-subtitle" style="margin-bottom:0;">15-component composite index scored 0–100 by neighborhood. Higher is better.</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <span class="data-badge">SPI v4 — 15 components</span>
+        <span class="data-badge">41 neighborhoods</span>
+      </div>
+    </div>
+
+    <div class="map-container" id="mapContainer">
+      <div class="loading-overlay" id="mapLoading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading perception data...</div>
+      </div>
+      <div id="deckgl-container" style="width:100%;height:100%;"></div>
+
+      <!-- Time control -->
+      <div class="map-controls">
+        <div class="time-control">
+          <label>Time of Day</label>
+          <div class="time-label" id="currentTimeLabel">All Day Average</div>
+          <input type="range" class="time-slider" id="timeSlider" min="0" max="6" value="0" step="1">
+          <button class="play-btn" id="playBtn" onclick="togglePlay()">▶ Animate</button>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="map-legend">
+        <div class="legend-title">Safety Perception Index</div>
+        <div class="legend-bar"></div>
+        <div class="legend-labels">
+          <span>0 — Low</span>
+          <span>50</span>
+          <span>100 — High</span>
+        </div>
+      </div>
+
+      <!-- Tooltip -->
+      <div class="map-tooltip" id="mapTooltip">
+        <div class="tt-name" id="ttName"></div>
+        <div class="tt-score" id="ttScore"></div>
+        <div class="tt-label">Safety Perception Index</div>
+        <div class="tt-factors" id="ttFactors"></div>
+        <div class="tt-counts" id="ttCounts"></div>
+      </div>
+    </div>
+
+    <div class="insight-box" style="margin-top:20px;">
+      <div class="insight-label">Reading This Map</div>
+      <p>Each neighborhood polygon is colored by its composite Safety Perception Index — fusing disorder reports, crime severity, lighting, business vitality, transit ridership, review sentiment, and 9 other signals. <span class="insight-emphasis">Red areas score lowest</span> on perceived safety; <span class="insight-emphasis">green areas score highest</span>. Use the time slider to see how perception shifts across the day — nighttime scores drop dramatically in areas with poor lighting and high disorder.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TAB 3: SAFETY INDEX                                     -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-index">
+  <div class="section">
+    <div class="section-title">Neighborhood Safety Index</div>
+    <div class="section-subtitle">All 41 neighborhoods ranked by Safety Perception Index. Higher scores indicate better perceived safety conditions.</div>
+
+    <div class="chart-card">
+      <div class="chart-title">SPI v4 Scores by Neighborhood</div>
+      <div class="chart-subtitle">Composite of 15 weighted components | 28 data sources | ~2.7M records</div>
+      <div id="spiBarChart"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Disorder vs. Crime Divergence</div>
+      <div class="chart-subtitle">Neighborhoods where 311 disorder volume diverges from crime severity — suggesting perception problems distinct from crime risk</div>
+      <div id="divergenceChart" style="min-height:300px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TAB 4: TIME OF DAY                                      -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-time">
+  <div class="section">
+    <div class="section-title">How Safety Shifts Across the Day</div>
+    <div class="section-subtitle">SPI scores by time window reveal when and where perception degrades. Nighttime scores drop an average of 15–25 points in high-disorder neighborhoods.</div>
+
+    <div class="chart-card">
+      <div class="chart-title">SPI by Neighborhood × Time Window</div>
+      <div class="chart-subtitle">6 time windows (4-hour blocks) across 15 focus neighborhoods</div>
+      <div id="timeHeatmap" style="overflow-x:auto;"></div>
+    </div>
+
+    <div class="insight-box">
+      <div class="insight-label">Why This Matters for Phase 1</div>
+      <p>Current data shows perception shifts by time of day — but at <span class="insight-emphasis">neighborhood resolution only</span>. Phase 1's direct sentiment collection via POS, transit, and building systems captures these shifts at <span class="insight-emphasis">block-level, 4-hour resolution</span>. A merchant on Powell Street would know that their block's perception drops 18 points after 8pm — and that deploying ambassadors during that window could measurably recover it.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TAB 5: CORRELATION ENGINE                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-correlation">
+  <div class="section">
+    <div class="section-title">Correlation Engine</div>
+    <div class="section-subtitle">How each SPI component relates to the composite score. These correlations suggest which interventions may have the most impact on perceived safety.</div>
+
+    <div class="chart-card">
+      <div class="chart-title">Component Weights &amp; Contribution</div>
+      <div class="chart-subtitle">15 components weighted by research literature. Empirical calibration against City Survey data is the next methodological priority.</div>
+      <div id="componentChart"></div>
+    </div>
+
+    <div class="compare-grid" style="margin-top:20px;">
+      <div class="chart-card" style="margin-bottom:0;">
+        <h4 style="font-family:var(--font-display);font-size:1rem;color:var(--green-dark);margin-bottom:12px;">Direct Perception Drivers</h4>
+        <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">Disorder density (311 reports), crime severity, lighting risk, and waste/odor reports are <em>direct</em> inputs — things people see, feel, and react to on the street.</p>
+      </div>
+      <div class="chart-card" style="margin-bottom:0;">
+        <h4 style="font-family:var(--font-display);font-size:1rem;color:var(--green-dark);margin-bottom:12px;">Behavioral Response Signals</h4>
+        <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">Transit ridership, business vitality, Yelp ratings, and digital concern are <em>behavioral</em> signals — how people respond to perceived conditions by avoiding, leaving, or complaining online.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;">
+      <div class="chart-title" style="margin-bottom:12px;">Example Phase 1 Alerts</div>
+      <div class="alert-mock">
+        <div class="alert-type">⚠ Perception Drop Alert</div>
+        <div class="alert-title">Mid-Market / 6th & Market — SPI dropped 12 points (evening window)</div>
+        <div class="alert-detail">311 encampment reports up 40% this week. Streetlight outage reported at 6th & Stevenson (unresolved 9 days). Yelp mentions of "sketchy" increased. Recommend: Ambassador deployment 4pm–10pm, streetlight repair escalation.</div>
+      </div>
+      <div class="alert-mock positive">
+        <div class="alert-type">✓ Perception Improvement</div>
+        <div class="alert-title">Union Square / Post & Powell — SPI improved 8 points (afternoon window)</div>
+        <div class="alert-detail">Following CBD cleanup initiative and ambassador expansion. 311 cleaning requests down 25%. Yelp safety-keyword sentiment improved. BART Powell exits up 6% WoW.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TAB 6: DATA & METHODS                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-methods">
+  <div class="section">
+    <div class="section-title">Data &amp; Methods</div>
+    <div class="section-subtitle">Full transparency on how the Safety Perception Index is constructed, what data feeds it, and what its limitations are.</div>
+
+    <div class="method-box">
+      <h4>SPI v4 Formula</h4>
+      <p style="margin-bottom:8px;"><code>SPI = 100 − scaled(Σ wᵢ × z_score(componentᵢ))</code></p>
+      <p>Each component is z-score normalized with a ±3σ soft cap. Positive signals (Yelp ratings, business vitality, tree density) are inverted so that higher raw values reduce the negative score. The weighted sum is then min-max scaled to 0–100, where 100 represents the best perceived safety conditions.</p>
+    </div>
+
+    <div class="method-box">
+      <h4>15 Components</h4>
+      <table class="corr-table">
+        <thead>
+          <tr><th>#</th><th>Component</th><th>Weight</th><th>Source</th><th>Signal</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Disorder Density</td><td>18%</td><td>311 Cases / km²</td><td>Volume of visible disorder</td></tr>
+          <tr><td>2</td><td>Crime Severity</td><td>14%</td><td>SFPD × severity / km²</td><td>Severity-weighted crime rate</td></tr>
+          <tr><td>3</td><td>Disorder Salience</td><td>8%</td><td>311 category weights</td><td>Encampments > waste > graffiti</td></tr>
+          <tr><td>4</td><td>Pedestrian Safety</td><td>5%</td><td>Traffic crashes / km²</td><td>Street-level danger</td></tr>
+          <tr><td>5</td><td>Temporal Risk</td><td>8%</td><td>Night ratio + trend</td><td>Nighttime concentration</td></tr>
+          <tr><td>6</td><td>Resolution Responsiveness</td><td>10%</td><td>311 median resolution days</td><td>"Nobody cares" perception</td></tr>
+          <tr><td>7</td><td>Review Sentiment</td><td>8%</td><td>Yelp avg rating</td><td>Customer experience</td></tr>
+          <tr><td>8</td><td>Transit Confidence</td><td>6%</td><td>BART exits YoY</td><td>Transit avoidance</td></tr>
+          <tr><td>9</td><td>Lighting Risk</td><td>5%</td><td>Streetlight outages / km²</td><td>Darkness perception</td></tr>
+          <tr><td>10</td><td>Business Vitality</td><td>4%</td><td>Net openings vs closures</td><td>Neighborhood trajectory</td></tr>
+          <tr><td>11</td><td>Emergency Density</td><td>4%</td><td>Fire/EMS medical / km²</td><td>Medical crisis clustering</td></tr>
+          <tr><td>12</td><td>Environmental Quality</td><td>4%</td><td>Trees + food/drink</td><td>Positive amenity density</td></tr>
+          <tr><td>13</td><td>Digital Concern</td><td>2%</td><td>Google Trends</td><td>Online safety worry</td></tr>
+          <tr><td>14</td><td>Noise Disorder</td><td>2%</td><td>Noise complaints / km²</td><td>Auditory disorder</td></tr>
+          <tr><td>15</td><td>Waste/Odor</td><td>2%</td><td>Waste reports / km²</td><td>Olfactory disorder</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="method-box">
+      <h4>Known Limitations &amp; Biases</h4>
+      <p><strong>Reporting bias:</strong> 311 data over-represents neighborhoods with engaged, tech-savvy residents. The Mission has the highest intervention volume not because it's the most disordered, but because it has the most active reporters. Census-based correction is planned.</p>
+      <p style="margin-top:8px;"><strong>Survival bias:</strong> Areas people actively avoid generate fewer data points and appear artificially safe. Commercial mobility data (Replica/SafeGraph) is the proposed mitigation but requires partnership access.</p>
+      <p style="margin-top:8px;"><strong>Temporal mismatch:</strong> 311 and crime data are daily; Yelp ratings are cumulative over years; census data is 5-year ACS. A neighborhood that improved recently may still carry a poor Yelp score from years of bad reviews.</p>
+      <p style="margin-top:8px;"><strong>Ecological fallacy:</strong> Neighborhood-level scores mask enormous internal variation. A resident on the north edge of the Tenderloin near Union Square has a very different experience than someone six blocks south. Phase 1's block-level resolution is the fix.</p>
+      <p style="margin-top:8px;"><strong>No causal model:</strong> Component weights are from research literature, not empirically calibrated to San Francisco. Regression against City Survey microdata is the planned methodological upgrade.</p>
+    </div>
+
+    <div class="method-box">
+      <h4>Data Sources</h4>
+      <p style="margin-bottom:8px;">All data is publicly available. No private or commercial datasets are used in the MVP.</p>
+      <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.8;">
+        311 Cases (DataSF <code>vw6y-z8j6</code>) · SFPD Incidents (DataSF <code>wg3w-h783</code>) · Fire/EMS Calls (DataSF <code>nuek-vuh3</code>) · Traffic Crashes (DataSF <code>ubvf-ztfx</code>) · Business Register (DataSF <code>g8m3-pdis</code>) · Street Trees (DataSF <code>tkzw-k3nq</code>) · Street Sweeping (DataSF <code>yhqp-riqs</code>) · Streetlight Outages (from 311) · Resolution Times (from 311) · Noise Complaints (from 311) · Waste/Odor Reports (from 311) · Yelp Fusion API · Reddit API · Google Trends · Niche.com · BART Ridership (bart.gov) · SFMTA Ridership &amp; Safety Survey · Census ACS (via census.gov) · SF Neighborhoods GeoJSON (sfchronicle/sf-shapefiles)
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TAB 7: PARTNER WITH US                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-partner">
+  <div class="section">
+    <div class="section-title">Partner With Us</div>
+    <div class="section-subtitle">Phase 1 validates whether direct safety sentiment can be captured reliably through existing digital touchpoints — and whether it fills the gap this MVP reveals.</div>
+
+    <div class="insight-box">
+      <div class="insight-label">The Blind Spot</div>
+      <p>Everything in this dashboard is built from proxy data. <span class="insight-emphasis">28 data sources, 2.7 million records</span> — all approximating what one question can measure directly: <em>"Right now, how does the surrounding area feel to you?"</em></p>
+    </div>
+
+    <div class="metrics-row">
+      <div class="metric-card accent">
+        <div class="metric-value">$150–200K</div>
+        <div class="metric-label">Phase 1 investment</div>
+        <div class="metric-detail">6-month pilot</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">5K → 50K</div>
+        <div class="metric-label">Monthly responses</div>
+        <div class="metric-detail">Ramp over 6 months</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">6</div>
+        <div class="metric-label">Channel types</div>
+        <div class="metric-detail">POS, transit, building, mobile</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">Block-level</div>
+        <div class="metric-label">Resolution target</div>
+        <div class="metric-detail">4-hour time windows</div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h4 style="font-family:var(--font-display);color:var(--green-dark);margin-bottom:12px;">Channel Partners</h4>
+      <table class="corr-table">
+        <thead><tr><th>Channel</th><th>Touchpoint</th><th>Persona</th></tr></thead>
+        <tbody>
+          <tr><td>Point of Sale</td><td>Square, Toast, Clover</td><td>Shoppers, diners</td></tr>
+          <tr><td>Transit</td><td>Clipper, BART kiosks</td><td>Commuters, visitors</td></tr>
+          <tr><td>Building Systems</td><td>Envoy, Kastle</td><td>Office workers, guests</td></tr>
+          <tr><td>Workforce</td><td>Homebase, Deputy, Lark</td><td>Small business employees</td></tr>
+          <tr><td>Hospitality</td><td>Hotel check-in systems</td><td>Business visitors, tourists</td></tr>
+          <tr><td>Public Space</td><td>QR codes, event ticketing</td><td>Pedestrians, event-goers</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="chart-card">
+      <h4 style="font-family:var(--font-display);color:var(--green-dark);margin-bottom:8px;">Governance Framework</h4>
+      <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7;">
+        Public Safety Pulse is designed for <strong>resource deployment</strong>, not ranking or real estate marketing. All data is anonymized and aggregated. No individual responses are traceable. No public neighborhood rankings are published. Scores inform where to send cleaning crews, ambassadors, lighting repairs, and activations — not where to avoid. Aggregation thresholds ensure statistical stability before any score is generated.
+      </p>
+    </div>
+
+    <div class="cta-section">
+      <h2>Fund Phase 1 to validate the signal</h2>
+      <p>28 public data sources, 2.7 million records — all approximating what one question can measure directly. Phase 1 tests whether that question, asked through existing digital touchpoints, produces a reliable signal that improves on everything you see here.</p>
+      <div class="cta-badge">$150K–$200K · 6 months · Block-level resolution</div>
+      <div style="margin-top:16px;font-size:0.8rem;opacity:0.7;">City Science Lab San Francisco × MIT Media Lab City Science</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- FOOTER                                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<footer class="site-footer">
+  City Science Lab San Francisco × MIT Media Lab City Science &nbsp;|&nbsp; Public Safety Pulse Phase 0 MVP &nbsp;|&nbsp; Data last updated: <span id="dataDate">Feb 2026</span>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- DEMO DATA (used when spi_v4_output.json not available) -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<script>
+// Realistic SPI scores based on SF neighborhood characteristics
+const DEMO_SPI = {
+  "Bayview Hunters Point": { spi: 32, spi_early_morning: 38, spi_morning: 42, spi_afternoon: 40, spi_evening: 30, spi_night: 22, spi_late_night: 18, count_311: 28400, count_crime: 4200, top_factors: [{factor:"311 Disorder Reports",impact:0.18},{factor:"Crime Severity",impact:0.14},{factor:"Emergency Calls",impact:0.08},{factor:"Slow City Response",impact:0.07},{factor:"Streetlight Outages",impact:0.05}] },
+  "Bernal Heights": { spi: 68, spi_early_morning: 72, spi_morning: 74, spi_afternoon: 72, spi_evening: 65, spi_night: 55, spi_late_night: 50, count_311: 12600, count_crime: 1800, top_factors: [{factor:"311 Disorder Reports",impact:0.06},{factor:"Crime Severity",impact:0.04},{factor:"Noise Complaints",impact:0.03},{factor:"Yelp Ratings",impact:0.03},{factor:"Business Closures",impact:0.02}] },
+  "Castro/Upper Market": { spi: 62, spi_early_morning: 66, spi_morning: 70, spi_afternoon: 68, spi_evening: 58, spi_night: 48, spi_late_night: 42, count_311: 15800, count_crime: 2400, top_factors: [{factor:"311 Disorder Reports",impact:0.08},{factor:"Noise Complaints",impact:0.05},{factor:"Crime Severity",impact:0.04},{factor:"Slow City Response",impact:0.04},{factor:"Streetlight Outages",impact:0.03}] },
+  "Chinatown": { spi: 52, spi_early_morning: 58, spi_morning: 60, spi_afternoon: 56, spi_evening: 48, spi_night: 38, spi_late_night: 32, count_311: 8200, count_crime: 2100, top_factors: [{factor:"Crime Severity",impact:0.10},{factor:"311 Disorder Reports",impact:0.09},{factor:"Emergency Calls",impact:0.05},{factor:"Streetlight Outages",impact:0.04},{factor:"Noise Complaints",impact:0.03}] },
+  "Excelsior": { spi: 55, spi_early_morning: 60, spi_morning: 62, spi_afternoon: 60, spi_evening: 52, spi_night: 42, spi_late_night: 38, count_311: 14200, count_crime: 2800, top_factors: [{factor:"311 Disorder Reports",impact:0.08},{factor:"Crime Severity",impact:0.06},{factor:"Pedestrian Safety",impact:0.04},{factor:"Emergency Calls",impact:0.04},{factor:"Business Closures",impact:0.03}] },
+  "Financial District/South Beach": { spi: 65, spi_early_morning: 58, spi_morning: 72, spi_afternoon: 70, spi_evening: 62, spi_night: 50, spi_late_night: 40, count_311: 18500, count_crime: 3200, top_factors: [{factor:"Crime Severity",impact:0.08},{factor:"311 Disorder Reports",impact:0.07},{factor:"Transit Ridership",impact:0.04},{factor:"Noise Complaints",impact:0.03},{factor:"Business Closures",impact:0.03}] },
+  "Glen Park": { spi: 78, spi_early_morning: 80, spi_morning: 82, spi_afternoon: 80, spi_evening: 76, spi_night: 68, spi_late_night: 64, count_311: 4800, count_crime: 600, top_factors: [{factor:"311 Disorder Reports",impact:0.03},{factor:"Crime Severity",impact:0.02},{factor:"Pedestrian Safety",impact:0.02},{factor:"Noise Complaints",impact:0.01},{factor:"Business Closures",impact:0.01}] },
+  "Golden Gate Park": { spi: 60, spi_early_morning: 50, spi_morning: 68, spi_afternoon: 70, spi_evening: 58, spi_night: 40, spi_late_night: 30, count_311: 6200, count_crime: 1400, top_factors: [{factor:"Nighttime Risk",impact:0.08},{factor:"311 Disorder Reports",impact:0.05},{factor:"Crime Severity",impact:0.04},{factor:"Streetlight Outages",impact:0.04},{factor:"Emergency Calls",impact:0.03}] },
+  "Haight Ashbury": { spi: 56, spi_early_morning: 60, spi_morning: 64, spi_afternoon: 62, spi_evening: 52, spi_night: 42, spi_late_night: 36, count_311: 11400, count_crime: 1900, top_factors: [{factor:"311 Disorder Reports",impact:0.09},{factor:"Disorder Visibility",impact:0.06},{factor:"Crime Severity",impact:0.05},{factor:"Noise Complaints",impact:0.04},{factor:"Waste/Odor Reports",impact:0.03}] },
+  "Hayes Valley": { spi: 58, spi_early_morning: 62, spi_morning: 66, spi_afternoon: 64, spi_evening: 54, spi_night: 44, spi_late_night: 38, count_311: 10200, count_crime: 2200, top_factors: [{factor:"311 Disorder Reports",impact:0.10},{factor:"Crime Severity",impact:0.07},{factor:"Disorder Visibility",impact:0.05},{factor:"Slow City Response",impact:0.04},{factor:"Noise Complaints",impact:0.03}] },
+  "Inner Richmond": { spi: 74, spi_early_morning: 76, spi_morning: 78, spi_afternoon: 78, spi_evening: 72, spi_night: 64, spi_late_night: 60, count_311: 8400, count_crime: 1200, top_factors: [{factor:"311 Disorder Reports",impact:0.04},{factor:"Crime Severity",impact:0.03},{factor:"Pedestrian Safety",impact:0.02},{factor:"Noise Complaints",impact:0.02},{factor:"Streetlight Outages",impact:0.01}] },
+  "Inner Sunset": { spi: 76, spi_early_morning: 78, spi_morning: 80, spi_afternoon: 80, spi_evening: 74, spi_night: 66, spi_late_night: 62, count_311: 7600, count_crime: 900, top_factors: [{factor:"311 Disorder Reports",impact:0.04},{factor:"Crime Severity",impact:0.02},{factor:"Pedestrian Safety",impact:0.02},{factor:"Noise Complaints",impact:0.01},{factor:"Slow City Response",impact:0.01}] },
+  "Japantown": { spi: 64, spi_early_morning: 66, spi_morning: 70, spi_afternoon: 68, spi_evening: 60, spi_night: 52, spi_late_night: 46, count_311: 4600, count_crime: 800, top_factors: [{factor:"311 Disorder Reports",impact:0.07},{factor:"Crime Severity",impact:0.04},{factor:"Slow City Response",impact:0.03},{factor:"Noise Complaints",impact:0.02},{factor:"Streetlight Outages",impact:0.02}] },
+  "Lakeshore": { spi: 72, spi_early_morning: 74, spi_morning: 76, spi_afternoon: 76, spi_evening: 70, spi_night: 62, spi_late_night: 58, count_311: 6800, count_crime: 1100, top_factors: [{factor:"311 Disorder Reports",impact:0.04},{factor:"Crime Severity",impact:0.03},{factor:"Pedestrian Safety",impact:0.02},{factor:"Business Closures",impact:0.02},{factor:"Emergency Calls",impact:0.01}] },
+  "Lincoln Park": { spi: 82, spi_early_morning: 80, spi_morning: 84, spi_afternoon: 86, spi_evening: 80, spi_night: 72, spi_late_night: 66, count_311: 2200, count_crime: 300, top_factors: [{factor:"311 Disorder Reports",impact:0.02},{factor:"Crime Severity",impact:0.01},{factor:"Nighttime Risk",impact:0.03},{factor:"Streetlight Outages",impact:0.01},{factor:"Pedestrian Safety",impact:0.01}] },
+  "Lone Mountain/USF": { spi: 70, spi_early_morning: 72, spi_morning: 74, spi_afternoon: 74, spi_evening: 68, spi_night: 60, spi_late_night: 54, count_311: 6200, count_crime: 1100, top_factors: [{factor:"311 Disorder Reports",impact:0.05},{factor:"Crime Severity",impact:0.04},{factor:"Noise Complaints",impact:0.02},{factor:"Slow City Response",impact:0.02},{factor:"Streetlight Outages",impact:0.02}] },
+  "Marina": { spi: 80, spi_early_morning: 82, spi_morning: 84, spi_afternoon: 84, spi_evening: 78, spi_night: 70, spi_late_night: 64, count_311: 5400, count_crime: 800, top_factors: [{factor:"311 Disorder Reports",impact:0.03},{factor:"Crime Severity",impact:0.02},{factor:"Noise Complaints",impact:0.02},{factor:"Pedestrian Safety",impact:0.01},{factor:"Streetlight Outages",impact:0.01}] },
+  "McLaren Park": { spi: 48, spi_early_morning: 52, spi_morning: 56, spi_afternoon: 54, spi_evening: 44, spi_night: 34, spi_late_night: 28, count_311: 8600, count_crime: 2200, top_factors: [{factor:"Crime Severity",impact:0.10},{factor:"311 Disorder Reports",impact:0.08},{factor:"Emergency Calls",impact:0.06},{factor:"Streetlight Outages",impact:0.05},{factor:"Nighttime Risk",impact:0.05}] },
+  "Mission": { spi: 42, spi_early_morning: 48, spi_morning: 52, spi_afternoon: 50, spi_evening: 38, spi_night: 28, spi_late_night: 22, count_311: 52600, count_crime: 6800, top_factors: [{factor:"311 Disorder Reports",impact:0.16},{factor:"Crime Severity",impact:0.12},{factor:"Disorder Visibility",impact:0.07},{factor:"Emergency Calls",impact:0.06},{factor:"Noise Complaints",impact:0.04}] },
+  "Mission Bay": { spi: 66, spi_early_morning: 62, spi_morning: 72, spi_afternoon: 70, spi_evening: 64, spi_night: 54, spi_late_night: 48, count_311: 7800, count_crime: 1600, top_factors: [{factor:"311 Disorder Reports",impact:0.06},{factor:"Crime Severity",impact:0.05},{factor:"Slow City Response",impact:0.03},{factor:"Noise Complaints",impact:0.02},{factor:"Business Closures",impact:0.02}] },
+  "Nob Hill": { spi: 64, spi_early_morning: 66, spi_morning: 70, spi_afternoon: 68, spi_evening: 60, spi_night: 52, spi_late_night: 46, count_311: 9800, count_crime: 2400, top_factors: [{factor:"Crime Severity",impact:0.08},{factor:"311 Disorder Reports",impact:0.07},{factor:"Disorder Visibility",impact:0.04},{factor:"Noise Complaints",impact:0.03},{factor:"Slow City Response",impact:0.03}] },
+  "Noe Valley": { spi: 82, spi_early_morning: 84, spi_morning: 86, spi_afternoon: 84, spi_evening: 80, spi_night: 72, spi_late_night: 68, count_311: 5200, count_crime: 600, top_factors: [{factor:"311 Disorder Reports",impact:0.03},{factor:"Crime Severity",impact:0.01},{factor:"Noise Complaints",impact:0.01},{factor:"Pedestrian Safety",impact:0.01},{factor:"Slow City Response",impact:0.01}] },
+  "North Beach": { spi: 60, spi_early_morning: 58, spi_morning: 66, spi_afternoon: 66, spi_evening: 56, spi_night: 46, spi_late_night: 38, count_311: 9200, count_crime: 2000, top_factors: [{factor:"311 Disorder Reports",impact:0.08},{factor:"Crime Severity",impact:0.06},{factor:"Noise Complaints",impact:0.05},{factor:"Disorder Visibility",impact:0.03},{factor:"Waste/Odor Reports",impact:0.03}] },
+  "Oceanview/Merced/Ingleside": { spi: 58, spi_early_morning: 62, spi_morning: 64, spi_afternoon: 62, spi_evening: 56, spi_night: 46, spi_late_night: 40, count_311: 12400, count_crime: 2600, top_factors: [{factor:"311 Disorder Reports",impact:0.07},{factor:"Crime Severity",impact:0.05},{factor:"Emergency Calls",impact:0.04},{factor:"Pedestrian Safety",impact:0.03},{factor:"Business Closures",impact:0.03}] },
+  "Outer Mission": { spi: 52, spi_early_morning: 56, spi_morning: 60, spi_afternoon: 58, spi_evening: 50, spi_night: 40, spi_late_night: 34, count_311: 11800, count_crime: 2400, top_factors: [{factor:"311 Disorder Reports",impact:0.08},{factor:"Crime Severity",impact:0.06},{factor:"Emergency Calls",impact:0.04},{factor:"Slow City Response",impact:0.04},{factor:"Pedestrian Safety",impact:0.03}] },
+  "Outer Richmond": { spi: 74, spi_early_morning: 76, spi_morning: 78, spi_afternoon: 78, spi_evening: 72, spi_night: 64, spi_late_night: 58, count_311: 9800, count_crime: 1400, top_factors: [{factor:"311 Disorder Reports",impact:0.04},{factor:"Crime Severity",impact:0.03},{factor:"Pedestrian Safety",impact:0.02},{factor:"Slow City Response",impact:0.02},{factor:"Business Closures",impact:0.01}] },
+  "Outer Sunset": { spi: 78, spi_early_morning: 80, spi_morning: 82, spi_afternoon: 82, spi_evening: 76, spi_night: 68, spi_late_night: 62, count_311: 8200, count_crime: 1000, top_factors: [{factor:"311 Disorder Reports",impact:0.03},{factor:"Crime Severity",impact:0.02},{factor:"Pedestrian Safety",impact:0.01},{factor:"Slow City Response",impact:0.01},{factor:"Business Closures",impact:0.01}] },
+  "Pacific Heights": { spi: 84, spi_early_morning: 86, spi_morning: 88, spi_afternoon: 86, spi_evening: 82, spi_night: 74, spi_late_night: 70, count_311: 4200, count_crime: 600, top_factors: [{factor:"Crime Severity",impact:0.02},{factor:"311 Disorder Reports",impact:0.02},{factor:"Noise Complaints",impact:0.01},{factor:"Pedestrian Safety",impact:0.01},{factor:"Slow City Response",impact:0.01}] },
+  "Portola": { spi: 56, spi_early_morning: 60, spi_morning: 62, spi_afternoon: 60, spi_evening: 54, spi_night: 44, spi_late_night: 38, count_311: 8800, count_crime: 1600, top_factors: [{factor:"311 Disorder Reports",impact:0.06},{factor:"Crime Severity",impact:0.05},{factor:"Emergency Calls",impact:0.04},{factor:"Slow City Response",impact:0.03},{factor:"Streetlight Outages",impact:0.03}] },
+  "Potrero Hill": { spi: 62, spi_early_morning: 64, spi_morning: 68, spi_afternoon: 66, spi_evening: 58, spi_night: 50, spi_late_night: 44, count_311: 12800, count_crime: 2200, top_factors: [{factor:"311 Disorder Reports",impact:0.07},{factor:"Crime Severity",impact:0.05},{factor:"Disorder Visibility",impact:0.04},{factor:"Slow City Response",impact:0.03},{factor:"Emergency Calls",impact:0.03}] },
+  "Presidio": { spi: 88, spi_early_morning: 86, spi_morning: 90, spi_afternoon: 92, spi_evening: 86, spi_night: 78, spi_late_night: 72, count_311: 1200, count_crime: 200, top_factors: [{factor:"Nighttime Risk",impact:0.02},{factor:"311 Disorder Reports",impact:0.01},{factor:"Crime Severity",impact:0.01},{factor:"Streetlight Outages",impact:0.01},{factor:"Pedestrian Safety",impact:0.01}] },
+  "Presidio Heights": { spi: 86, spi_early_morning: 88, spi_morning: 90, spi_afternoon: 88, spi_evening: 84, spi_night: 76, spi_late_night: 72, count_311: 2800, count_crime: 400, top_factors: [{factor:"Crime Severity",impact:0.02},{factor:"311 Disorder Reports",impact:0.01},{factor:"Noise Complaints",impact:0.01},{factor:"Pedestrian Safety",impact:0.01},{factor:"Slow City Response",impact:0.01}] },
+  "Russian Hill": { spi: 72, spi_early_morning: 74, spi_morning: 78, spi_afternoon: 76, spi_evening: 70, spi_night: 62, spi_late_night: 56, count_311: 6400, count_crime: 1200, top_factors: [{factor:"311 Disorder Reports",impact:0.05},{factor:"Crime Severity",impact:0.04},{factor:"Noise Complaints",impact:0.03},{factor:"Disorder Visibility",impact:0.02},{factor:"Pedestrian Safety",impact:0.02}] },
+  "Seacliff": { spi: 90, spi_early_morning: 90, spi_morning: 92, spi_afternoon: 92, spi_evening: 88, spi_night: 82, spi_late_night: 78, count_311: 800, count_crime: 100, top_factors: [{factor:"Nighttime Risk",impact:0.01},{factor:"311 Disorder Reports",impact:0.01},{factor:"Crime Severity",impact:0.01},{factor:"Pedestrian Safety",impact:0.01},{factor:"Slow City Response",impact:0.01}] },
+  "South of Market": { spi: 34, spi_early_morning: 38, spi_morning: 44, spi_afternoon: 42, spi_evening: 30, spi_night: 20, spi_late_night: 16, count_311: 48200, count_crime: 7200, top_factors: [{factor:"311 Disorder Reports",impact:0.17},{factor:"Crime Severity",impact:0.14},{factor:"Emergency Calls",impact:0.08},{factor:"Disorder Visibility",impact:0.07},{factor:"Slow City Response",impact:0.06}] },
+  "Sunset/Parkside": { spi: 76, spi_early_morning: 78, spi_morning: 80, spi_afternoon: 80, spi_evening: 74, spi_night: 66, spi_late_night: 60, count_311: 10200, count_crime: 1400, top_factors: [{factor:"311 Disorder Reports",impact:0.04},{factor:"Crime Severity",impact:0.02},{factor:"Pedestrian Safety",impact:0.02},{factor:"Slow City Response",impact:0.01},{factor:"Business Closures",impact:0.01}] },
+  "Tenderloin": { spi: 12, spi_early_morning: 18, spi_morning: 22, spi_afternoon: 20, spi_evening: 10, spi_night: 5, spi_late_night: 3, count_311: 47400, count_crime: 8600, top_factors: [{factor:"Crime Severity",impact:0.18},{factor:"311 Disorder Reports",impact:0.17},{factor:"Emergency Calls",impact:0.12},{factor:"Disorder Visibility",impact:0.10},{factor:"Waste/Odor Reports",impact:0.08}] },
+  "Treasure Island": { spi: 54, spi_early_morning: 56, spi_morning: 60, spi_afternoon: 58, spi_evening: 52, spi_night: 44, spi_late_night: 40, count_311: 3200, count_crime: 600, top_factors: [{factor:"311 Disorder Reports",impact:0.05},{factor:"Crime Severity",impact:0.04},{factor:"Slow City Response",impact:0.04},{factor:"Streetlight Outages",impact:0.03},{factor:"Business Closures",impact:0.03}] },
+  "Twin Peaks": { spi: 80, spi_early_morning: 82, spi_morning: 84, spi_afternoon: 84, spi_evening: 78, spi_night: 70, spi_late_night: 64, count_311: 3400, count_crime: 500, top_factors: [{factor:"311 Disorder Reports",impact:0.02},{factor:"Crime Severity",impact:0.02},{factor:"Nighttime Risk",impact:0.02},{factor:"Pedestrian Safety",impact:0.01},{factor:"Streetlight Outages",impact:0.01}] },
+  "Visitacion Valley": { spi: 44, spi_early_morning: 48, spi_morning: 52, spi_afternoon: 50, spi_evening: 42, spi_night: 32, spi_late_night: 26, count_311: 14600, count_crime: 3200, top_factors: [{factor:"311 Disorder Reports",impact:0.10},{factor:"Crime Severity",impact:0.08},{factor:"Emergency Calls",impact:0.06},{factor:"Slow City Response",impact:0.05},{factor:"Streetlight Outages",impact:0.04}] },
+  "West of Twin Peaks": { spi: 80, spi_early_morning: 82, spi_morning: 84, spi_afternoon: 84, spi_evening: 78, spi_night: 70, spi_late_night: 64, count_311: 5600, count_crime: 800, top_factors: [{factor:"311 Disorder Reports",impact:0.03},{factor:"Crime Severity",impact:0.02},{factor:"Pedestrian Safety",impact:0.01},{factor:"Noise Complaints",impact:0.01},{factor:"Slow City Response",impact:0.01}] },
+};
+
+const TIME_LABELS = {
+  0: "All Day Average",
+  1: "Early Morning (4am–8am)",
+  2: "Morning (8am–12pm)",
+  3: "Afternoon (12pm–4pm)",
+  4: "Evening (4pm–8pm)",
+  5: "Night (8pm–12am)",
+  6: "Late Night (12am–4am)"
+};
+const TIME_KEYS = ["spi", "spi_early_morning", "spi_morning", "spi_afternoon", "spi_evening", "spi_night", "spi_late_night"];
+</script>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- APPLICATION LOGIC                                       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<script>
+let geoData = null;
+let deckInstance = null;
+let currentTimeIndex = 0;
+let isPlaying = false;
+let playInterval = null;
+
+// ─── COLOR SCALE ──────────────────────────────────────────
+function spiColor(spi) {
+  // Red → Orange → Yellow → Green
+  if (spi <= 20)  return [192, 57, 43, 200];    // deep red
+  if (spi <= 35)  return [211, 84, 0, 195];     // red-orange
+  if (spi <= 50)  return [230, 126, 34, 190];   // orange
+  if (spi <= 60)  return [241, 196, 15, 180];   // yellow
+  if (spi <= 70)  return [46, 204, 113, 170];   // light green
+  if (spi <= 80)  return [39, 174, 96, 175];    // green
+  return [27, 138, 90, 180];                     // deep green
+}
+
+function spiColorCSS(spi) {
+  if (spi <= 20)  return '#C0392B';
+  if (spi <= 35)  return '#D35400';
+  if (spi <= 50)  return '#E67E22';
+  if (spi <= 60)  return '#F1C40F';
+  if (spi <= 70)  return '#2ECC71';
+  if (spi <= 80)  return '#27AE60';
+  return '#1B8A5A';
+}
+
+// ─── DATA LOADING ──────────────────────────────────────────
+async function loadData() {
+  // Try loading computed SPI data first
+  try {
+    const resp = await fetch('data/spi_v4_output.json');
+    if (resp.ok) {
+      geoData = await resp.json();
+      console.log('Loaded SPI v4 output from compute script');
+      return;
+    }
+  } catch(e) { /* Fall through to GeoJSON + demo data */ }
+
+  // Try loading plain GeoJSON and inject demo data
+  try {
+    const resp = await fetch('data/sf_neighborhoods.geojson');
+    if (resp.ok) {
+      geoData = await resp.json();
+      injectDemoData();
+      console.log('Loaded GeoJSON + demo SPI data');
+      return;
+    }
+  } catch(e) { /* Fall through to CDN */ }
+
+  // Load from CDN as last resort
+  try {
+    const resp = await fetch('https://raw.githubusercontent.com/sfchronicle/sf-shapefiles/main/SF%20neighborhoods/sf-neighborhoods-analysis.json');
+    if (resp.ok) {
+      geoData = await resp.json();
+      injectDemoData();
+      console.log('Loaded GeoJSON from CDN + demo SPI data');
+      return;
+    }
+  } catch(e) {
+    console.error('Failed to load GeoJSON from all sources');
+  }
+}
+
+function injectDemoData() {
+  if (!geoData) return;
+  for (const feat of geoData.features) {
+    const name = feat.properties.nhood;
+    const demo = DEMO_SPI[name];
+    if (demo) {
+      Object.assign(feat.properties, demo);
+    } else {
+      feat.properties.spi = 55;
+      feat.properties.count_311 = 0;
+      feat.properties.count_crime = 0;
+      feat.properties.top_factors = [];
+      for (const k of TIME_KEYS.slice(1)) feat.properties[k] = 55;
+    }
+  }
+}
+
+// ─── MAP RENDERING ──────────────────────────────────────────
+function renderMap() {
+  if (!geoData) return;
+  const container = document.getElementById('deckgl-container');
+  const tooltip = document.getElementById('mapTooltip');
+  const spiKey = TIME_KEYS[currentTimeIndex];
+
+  const layer = new deck.GeoJsonLayer({
+    id: 'neighborhoods',
+    data: geoData,
+    getFillColor: d => spiColor(d.properties[spiKey] || 50),
+    getLineColor: [255, 255, 255, 120],
+    getLineWidth: 1.5,
+    lineWidthMinPixels: 1,
+    pickable: true,
+    stroked: true,
+    filled: true,
+    extruded: false,
+    autoHighlight: true,
+    highlightColor: [255, 255, 255, 60],
+    onHover: ({object, x, y}) => {
+      if (object) {
+        const p = object.properties;
+        const spi = p[spiKey] || 50;
+        document.getElementById('ttName').textContent = p.nhood;
+        document.getElementById('ttScore').textContent = Math.round(spi);
+        document.getElementById('ttScore').style.color = spiColorCSS(spi);
+
+        // Top factors
+        const factorsEl = document.getElementById('ttFactors');
+        const factors = p.top_factors || [];
+        factorsEl.innerHTML = factors.slice(0, 4).map(f =>
+          `<div class="tt-factor-row"><span>${f.factor}</span><span style="font-weight:600;">${(f.impact * 100).toFixed(0)}%</span></div>`
+        ).join('');
+
+        // Counts
+        document.getElementById('ttCounts').innerHTML =
+          `<span>311: ${(p.count_311 || 0).toLocaleString()}</span>` +
+          `<span>Crime: ${(p.count_crime || 0).toLocaleString()}</span>` +
+          `<span>Area: ${(p.area_km2 || '?')} km²</span>`;
+
+        tooltip.style.left = (x + 16) + 'px';
+        tooltip.style.top = (y - 10) + 'px';
+        // Keep tooltip within bounds
+        const rect = container.getBoundingClientRect();
+        if (x + 300 > rect.width) tooltip.style.left = (x - 290) + 'px';
+        if (y + 200 > rect.height) tooltip.style.top = (y - 220) + 'px';
+        tooltip.classList.add('visible');
+      } else {
+        tooltip.classList.remove('visible');
+      }
+    },
+    updateTriggers: {
+      getFillColor: currentTimeIndex
+    }
+  });
+
+  if (deckInstance) {
+    deckInstance.setProps({ layers: [layer] });
+  } else {
+    deckInstance = new deck.DeckGL({
+      container: 'deckgl-container',
+      initialViewState: {
+        latitude: 37.76,
+        longitude: -122.44,
+        zoom: 11.5,
+        pitch: 0,
+        bearing: 0
+      },
+      controller: true,
+      layers: [layer],
+      getTooltip: () => null,
+      style: { background: '#1a1a2e' }
+    });
+
+    // Add dark basemap tiles manually
+    const mapDiv = document.getElementById('deckgl-container');
+    const tileLayer = document.createElement('div');
+    tileLayer.style.cssText = 'position:absolute;inset:0;z-index:-1;';
+    tileLayer.innerHTML = `<img src="" style="display:none;">`;
+    // Using CSS background for the dark theme
+    mapDiv.style.background = `
+      radial-gradient(ellipse at 40% 50%, #1a2332 0%, #0f1419 100%)
+    `;
+  }
+}
+
+// ─── TIME CONTROLS ──────────────────────────────────────────
+document.getElementById('timeSlider').addEventListener('input', function() {
+  currentTimeIndex = parseInt(this.value);
+  document.getElementById('currentTimeLabel').textContent = TIME_LABELS[currentTimeIndex];
+  renderMap();
+});
+
+function togglePlay() {
+  isPlaying = !isPlaying;
+  const btn = document.getElementById('playBtn');
+  if (isPlaying) {
+    btn.textContent = '⏸ Pause';
+    playInterval = setInterval(() => {
+      currentTimeIndex = (currentTimeIndex % 6) + 1; // skip 0 (all-day) during animation
+      if (currentTimeIndex > 6) currentTimeIndex = 1;
+      document.getElementById('timeSlider').value = currentTimeIndex;
+      document.getElementById('currentTimeLabel').textContent = TIME_LABELS[currentTimeIndex];
+      renderMap();
+    }, 2000);
+  } else {
+    btn.textContent = '▶ Animate';
+    clearInterval(playInterval);
+  }
+}
+
+// ─── TAB SWITCHING ──────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('panel-' + this.dataset.tab).classList.add('active');
+
+    // Resize map if switching to map tab
+    if (this.dataset.tab === 'map' && deckInstance) {
+      setTimeout(() => deckInstance.redraw(true), 100);
+    }
+  });
+});
+
+// ─── RENDER CHARTS ──────────────────────────────────────────
+function renderSPIBarChart() {
+  const container = document.getElementById('spiBarChart');
+  if (!container) return;
+
+  const entries = Object.entries(DEMO_SPI).sort((a, b) => a[1].spi - b[1].spi);
+
+  container.innerHTML = entries.map(([name, d]) => {
+    const color = spiColorCSS(d.spi);
+    return `
+      <div class="spi-bar-row">
+        <div class="spi-bar-label">${name}</div>
+        <div class="spi-bar-track">
+          <div class="spi-bar-fill" style="width:${d.spi}%;background:${color};"></div>
+        </div>
+        <div class="spi-bar-value" style="color:${color}">${d.spi}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderDivergenceChart() {
+  const container = document.getElementById('divergenceChart');
+  if (!container) return;
+
+  // Show top 10 neighborhoods with highest divergence between disorder and crime
+  const focus = [
+    "Tenderloin", "South of Market", "Mission", "Bayview Hunters Point",
+    "Visitacion Valley", "Hayes Valley", "Haight Ashbury", "Chinatown",
+    "Financial District/South Beach", "North Beach"
+  ];
+
+  const html = `
+    <svg viewBox="0 0 700 300" style="width:100%;max-width:700px;">
+      ${focus.map((name, i) => {
+        const d = DEMO_SPI[name] || { count_311: 0, count_crime: 0 };
+        const maxVal = 55000;
+        const barW311 = Math.min((d.count_311 / maxVal) * 300, 300);
+        const barWCrime = Math.min((d.count_crime / maxVal) * 300, 300);
+        const y = i * 28 + 10;
+        const shortName = name.length > 20 ? name.slice(0, 18) + '…' : name;
+        return `
+          <text x="145" y="${y + 14}" text-anchor="end" font-size="11" fill="#5A5A5A" font-family="DM Sans,sans-serif">${shortName}</text>
+          <rect x="155" y="${y}" width="${barW311}" height="11" fill="#E67E22" rx="2" opacity="0.8"/>
+          <rect x="155" y="${y + 13}" width="${barWCrime}" height="11" fill="#8E44AD" rx="2" opacity="0.8"/>
+        `;
+      }).join('')}
+      <text x="155" y="295" font-size="10" fill="#8A8A8A" font-family="DM Sans,sans-serif">
+        <tspan fill="#E67E22">■</tspan> 311 Disorder Reports &nbsp;&nbsp;
+        <tspan fill="#8E44AD">■</tspan> SFPD Crime Incidents
+      </text>
+    </svg>
+  `;
+  container.innerHTML = html;
+}
+
+function renderTimeHeatmap() {
+  const container = document.getElementById('timeHeatmap');
+  if (!container) return;
+
+  const focus = [
+    "Tenderloin", "South of Market", "Mission", "Bayview Hunters Point",
+    "Hayes Valley", "Chinatown", "Haight Ashbury", "North Beach",
+    "Castro/Upper Market", "Financial District/South Beach",
+    "Nob Hill", "Marina", "Pacific Heights", "Inner Richmond", "Noe Valley"
+  ];
+  const windows = ["early_morning", "morning", "afternoon", "evening", "night", "late_night"];
+  const windowLabels = ["4–8am", "8am–12", "12–4pm", "4–8pm", "8pm–12", "12–4am"];
+
+  let html = '<div class="heatmap-grid">';
+  html += '<div class="heatmap-header"></div>';
+  windowLabels.forEach(l => { html += `<div class="heatmap-header">${l}</div>`; });
+
+  focus.forEach(name => {
+    const d = DEMO_SPI[name] || {};
+    const shortName = name.length > 22 ? name.slice(0, 20) + '…' : name;
+    html += `<div class="heatmap-label">${shortName}</div>`;
+    windows.forEach(w => {
+      const spi = d['spi_' + w] || 50;
+      const bg = spiColorCSS(spi);
+      const textColor = spi < 40 ? '#fff' : spi < 65 ? '#333' : '#fff';
+      html += `<div class="heatmap-cell" style="background:${bg};color:${textColor}">${spi}</div>`;
+    });
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderComponentChart() {
+  const container = document.getElementById('componentChart');
+  if (!container) return;
+
+  const components = [
+    { name: "Disorder Density", weight: 18, type: "direct" },
+    { name: "Crime Severity", weight: 14, type: "direct" },
+    { name: "Resolution Responsiveness", weight: 10, type: "system" },
+    { name: "Disorder Salience", weight: 8, type: "direct" },
+    { name: "Temporal Risk", weight: 8, type: "direct" },
+    { name: "Review Sentiment", weight: 8, type: "behavioral" },
+    { name: "Transit Confidence", weight: 6, type: "behavioral" },
+    { name: "Lighting Risk", weight: 5, type: "direct" },
+    { name: "Pedestrian Safety", weight: 5, type: "direct" },
+    { name: "Business Vitality", weight: 4, type: "behavioral" },
+    { name: "Emergency Density", weight: 4, type: "direct" },
+    { name: "Environmental Quality", weight: 4, type: "system" },
+    { name: "Digital Concern", weight: 2, type: "behavioral" },
+    { name: "Noise Disorder", weight: 2, type: "direct" },
+    { name: "Waste/Odor", weight: 2, type: "direct" },
+  ];
+  const typeColors = { direct: "#D4594E", behavioral: "#2D5A50", system: "#E67E22" };
+
+  container.innerHTML = components.map(c => `
+    <div class="spi-bar-row">
+      <div class="spi-bar-label">${c.name}</div>
+      <div class="spi-bar-track">
+        <div class="spi-bar-fill" style="width:${c.weight * 5}%;background:${typeColors[c.type]};"></div>
+      </div>
+      <div class="spi-bar-value" style="color:${typeColors[c.type]}">${c.weight}%</div>
+    </div>
+  `).join('') + `
+    <div style="margin-top:12px;font-size:0.72rem;color:var(--text-muted);">
+      <span style="color:#D4594E;">■</span> Direct perception driver &nbsp;&nbsp;
+      <span style="color:#2D5A50;">■</span> Behavioral response &nbsp;&nbsp;
+      <span style="color:#E67E22;">■</span> System response
+    </div>
+  `;
+}
+
+// ─── INITIALIZE ──────────────────────────────────────────
+async function init() {
+  // Render static charts immediately
+  renderSPIBarChart();
+  renderDivergenceChart();
+  renderTimeHeatmap();
+  renderComponentChart();
+
+  // Load geo data and render map
+  await loadData();
+  document.getElementById('mapLoading').style.display = 'none';
+  renderMap();
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

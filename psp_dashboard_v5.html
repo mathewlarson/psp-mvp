@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Public Safety Pulse — San Francisco</title>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'DM Sans', -apple-system, sans-serif; background: #FAF7F2; color: #1A1A1A; line-height: 1.6; }
+h1,h2,h3,h4 { font-family: 'DM Serif Display', Georgia, serif; font-weight: 400; }
+
+.header { background: #1B3A35; padding: 48px 0 36px; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 32px; }
+.header .org { color: rgba(255,255,255,0.4); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
+.header h1 { color: #fff; font-size: 2.4rem; }
+.header .sub { color: rgba(255,255,255,0.6); margin-top: 8px; }
+
+.nav { background: #fff; border-bottom: 1px solid #E5E7EB; position: sticky; top: 0; z-index: 100; }
+.nav-inner { max-width: 980px; margin: 0 auto; padding: 0 32px; display: flex; overflow-x: auto; }
+.nav-btn { padding: 13px 22px; border: none; background: none; cursor: pointer; font-family: inherit; font-size: 13px; color: #6B7280; border-bottom: 2px solid transparent; white-space: nowrap; }
+.nav-btn.active { color: #1B3A35; font-weight: 700; border-bottom-color: #D4594E; }
+
+.main { max-width: 980px; margin: 0 auto; padding: 32px; }
+.sec { display: none; }
+.sec.active { display: block; }
+
+.label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #D4594E; margin-bottom: 6px; }
+.quote { border-left: 3px solid #D4594E; padding: 4px 0 4px 24px; margin: 28px 0; }
+.quote p { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.25rem; font-style: italic; color: #374151; line-height: 1.5; }
+.quote .attr { font-size: 13px; color: #9CA3AF; font-style: normal; margin-top: 8px; }
+
+.metrics { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+.m { flex: 1; min-width: 140px; background: #fff; border-radius: 8px; padding: 20px 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.m .v { font-family: 'DM Serif Display', Georgia, serif; font-size: 2rem; line-height: 1; }
+.m .l { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6B7280; margin-top: 6px; }
+.m .s { font-size: 10px; color: #9CA3AF; margin-top: 2px; }
+
+.card { background: #fff; border-radius: 10px; padding: 24px; margin: 20px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.dark { background: #1B3A35; border-radius: 10px; padding: 28px 32px; color: #fff; margin: 24px 0; }
+.dark h3 { color: #fff; font-size: 1.3rem; margin-bottom: 8px; }
+.dark p { color: rgba(255,255,255,0.75); }
+.dark .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.dark .gv { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.8rem; }
+.dark .gl { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+.insight { background: #fff; border-left: 3px solid #D4594E; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.insight .tag { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #D4594E; margin-bottom: 4px; }
+
+.note { background: #F3F4F6; border-radius: 6px; padding: 14px 18px; font-size: 12px; color: #6B7280; margin: 16px 0; }
+.note strong { color: #374151; }
+.badge { display: inline-block; background: #E5E7EB; border-radius: 3px; padding: 1px 6px; font-size: 10px; font-family: 'JetBrains Mono', monospace; color: #6B7280; margin: 0 2px; }
+
+.prose { font-size: 15px; color: #374151; margin: 14px 0; }
+.prose em { color: #D4594E; }
+.prose strong { color: #1A1A1A; }
+
+table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+th { background: #F9FAFB; padding: 10px 14px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #6B7280; text-align: left; border-bottom: 2px solid #E5E7EB; }
+td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #F3F4F6; }
+
+.spi-bar { display: flex; align-items: center; gap: 8px; }
+.spi-fill { height: 18px; border-radius: 3px; transition: width 0.6s; }
+.spi-num { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; min-width: 32px; }
+
+.channels { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+.ch { background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.ch .t { font-weight: 700; font-size: 13px; color: #1B3A35; margin-bottom: 4px; }
+.ch .d { font-size: 12px; color: #6B7280; }
+
+footer { max-width: 980px; margin: 0 auto; padding: 24px 32px 40px; text-align: center; color: #9CA3AF; font-size: 11px; border-top: 1px solid #E5E7EB; }
+
+@media (max-width: 768px) {
+    .metrics { flex-direction: column; }
+    .dark .grid { grid-template-columns: 1fr; }
+    .channels { grid-template-columns: 1fr; }
+    .main { padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header"><div class="wrap">
+    <div class="org">City Science Lab San Francisco × MIT Media Lab City Science</div>
+    <h1>Public Safety Pulse</h1>
+    <div class="sub">Measuring everyday safety perception in San Francisco — MVP Dashboard</div>
+</div></div>
+
+<div class="nav"><div class="nav-inner">
+    <button class="nav-btn active" onclick="show('gap',this)">The Perception Gap</button>
+    <button class="nav-btn" onclick="show('spi',this)">Safety Perception Index</button>
+    <button class="nav-btn" onclick="show('time',this)">Time of Day</button>
+    <button class="nav-btn" onclick="show('hoods',this)">Neighborhoods</button>
+    <button class="nav-btn" onclick="show('method',this)">Data & Methods</button>
+    <button class="nav-btn" onclick="show('ask',this)">The Ask</button>
+</div></div>
+
+<div class="main">
+
+<!-- ═══ GAP ═══ -->
+<div id="gap" class="sec active">
+    <div class="quote">
+        <p>"Safety isn't just a statistic; it's a feeling you hold when you're walking down the street."</p>
+        <div class="attr">— Daniel Lurie, Mayor of San Francisco, Inauguration Speech, January 2025</div>
+    </div>
+
+    <div class="metrics">
+        <div class="m"><div class="v" style="color:#2D8B4E">↓35%</div><div class="l">Reported Crime</div><div class="s">2019 → 2024 (SFPD)</div></div>
+        <div class="m"><div class="v" style="color:#D4A03C">63%</div><div class="l">Feel Safe (Day)</div><div class="s">2023 City Survey</div></div>
+        <div class="m"><div class="v" style="color:#D4594E">36%</div><div class="l">Feel Safe (Night)</div><div class="s">2023 City Survey</div></div>
+        <div class="m"><div class="v" style="color:#1B3A35">626,911</div><div class="l">311 Disorder Cases</div><div class="s">Feb 2025 – Feb 2026</div></div>
+    </div>
+
+    <p class="prose">
+        San Francisco's reported crime has declined substantially since 2019. SFPD incident data shows a roughly
+        35% reduction from 2019 to 2024 across all police districts. Yet the 2023 City Performance Survey — the most
+        recent available — recorded the lowest safety satisfaction since the survey began in 1996. Only 63% of
+        residents reported feeling safe walking during the day, down from 85% in 2019. At night, only 36% feel safe,
+        down from 53%.
+    </p>
+    <p class="prose">
+        <strong>This is the perception gap.</strong> The statistical picture is improving. The lived experience has not
+        kept pace. Why? Because safety <em>perception</em> is driven less by crime rates and more by what people
+        <em>see on the street</em> — encampments, needles, aggressive behavior, graffiti, broken infrastructure.
+        These conditions are captured in 311 service request data, not police reports.
+    </p>
+
+    <div class="dark">
+        <div class="label" style="color:#D4A03C;">CityBeat 2025 Poll — SF Chamber of Commerce</div>
+        <h3>New data suggests perception is beginning to shift</h3>
+        <div class="grid">
+            <div><div class="gv" style="color:#2D8B4E">78%</div><div class="gl">of weekly downtown visitors feel safe during the day</div></div>
+            <div><div class="gv" style="color:#D4A03C">43%</div><div class="gl">say SF is on the right track (was 22% in 2024)</div></div>
+            <div><div class="gv" style="color:#6BB8F0">↓34%</div><div class="gl">fewer voters say crime has gotten worse (since 2022)</div></div>
+            <div><div class="gv" style="color:#6BB8F0">↓25%</div><div class="gl">fewer say homelessness/street behavior is worse</div></div>
+        </div>
+        <p style="font-size:11px;color:rgba(255,255,255,0.3);border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;margin-top:16px;">
+            Source: SF Chamber of Commerce CityBeat 2025 Poll. These are the most recent perception data points available.
+            The City Survey has not been conducted since 2023. This is exactly the data gap PSP addresses.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="label">Hourly Distribution</div>
+        <h4>When Are Disorder Reports Filed?</h4>
+        <div id="hourly-chart" style="height:280px;"></div>
+    </div>
+
+    <div class="note">
+        <strong>Data sources on this page:</strong>
+        SF City Performance Survey 2023 (Controller's Office),
+        CityBeat 2025 Poll (SF Chamber of Commerce),
+        SFPD Incident Reports via DataSF
+        <span class="badge">wg3w-h783</span>,
+        311 Service Requests via DataSF
+        <span class="badge">vw6y-z8j6</span>.
+        Crime decline figure (35%) based on SFPD reported incidents 2019 vs 2024.
+    </div>
+</div>
+
+<!-- ═══ SPI ═══ -->
+<div id="spi" class="sec">
+    <div class="label">Computed Metric</div>
+    <h2>Safety Perception Index</h2>
+    <p class="prose">
+        The SPI estimates how safe each neighborhood <em>feels</em> based on observable proxy data.
+        It combines five components: disorder density (311 reports per km²), crime rate (SFPD incidents per km²),
+        disorder composition (encampments and waste weigh more than graffiti), nighttime concentration,
+        and trend direction. Scale: 0 (least safe feeling) to 100 (safest feeling).
+    </p>
+    <p class="prose" style="color:#6B7280;font-size:13px;">
+        <strong>Important:</strong> This is a proxy estimate, not a direct measurement. Actual perception data
+        would come from Phase 1's direct sentiment collection. These scores have not been validated against
+        a perception survey and should be interpreted as relative rankings, not absolute measurements.
+    </p>
+
+    <div class="card">
+        <h4>SPI by Neighborhood (lowest to highest)</h4>
+        <div id="spi-chart" style="height:600px;"></div>
+    </div>
+
+    <div class="insight">
+        <div class="tag">Key Finding</div>
+        <strong>Tenderloin</strong> scores lowest (SPI 11.5) with 42,009
+        disorder reports and 12,486 crime incidents in a 0.6 km² area.
+        <strong>Presidio</strong> scores highest (SPI 77.9).
+        The 10× range in SPI scores across neighborhoods demonstrates exactly the kind of block-level
+        variation that citywide surveys cannot capture.
+    </div>
+
+    <div class="card">
+        <h4>Disorder–Crime Divergence Index</h4>
+        <p style="font-size:13px;color:#6B7280;margin-bottom:12px;">
+            Where the divergence is positive, disorder signals (what people see) exceed crime rates (what gets reported).
+            These are <strong>perception problems</strong> — areas that feel unsafe primarily because of environmental
+            conditions, not criminal danger. Negative divergence indicates potential hidden risk.
+        </p>
+        <div id="dcdi-chart" style="height:500px;"></div>
+    </div>
+</div>
+
+<!-- ═══ TIME ═══ -->
+<div id="time" class="sec">
+    <div class="label">Temporal Patterns</div>
+    <h2>How Disorder Shifts Throughout the Day</h2>
+    <p class="prose">
+        Safety perception changes dramatically by time of day. The same corner can feel vibrant at noon
+        and threatening at midnight. This heatmap shows how 311 disorder report rates vary across
+        6 time windows for the neighborhoods with the most activity.
+    </p>
+
+    <div class="card">
+        <h4>Disorder Reports by Time Window & Neighborhood</h4>
+        <p style="font-size:12px;color:#6B7280;margin-bottom:8px;">Cases per month in each time window. Darker = more reports.</p>
+        <div id="time-heatmap" style="height:450px;"></div>
+    </div>
+
+    <div class="insight">
+        <div class="tag">Why This Matters</div>
+        The City Survey asks "do you feel safe during the day?" — one question, once every two years,
+        at neighborhood level. Public Safety Pulse would capture this variation in 4-hour windows,
+        every day, at block level. That's the difference between knowing a neighborhood has a problem
+        and knowing which intersection, at which hour, needs an intervention.
+    </div>
+</div>
+
+<!-- ═══ HOODS ═══ -->
+<div id="hoods" class="sec">
+    <div class="label">Neighborhood Deep Dive</div>
+    <h2>What's Driving Disorder in Each Area?</h2>
+
+    <div class="card">
+        <h4>Top 5 Category Breakdown by Neighborhood</h4>
+        <p style="font-size:12px;color:#6B7280;margin-bottom:8px;">What types of 311 reports dominate in the lowest-SPI neighborhoods?</p>
+        <div id="cat-hood-chart" style="height:400px;"></div>
+    </div>
+
+    <div class="card">
+        <h4>Monthly Trends</h4>
+        <div id="monthly-chart" style="height:300px;"></div>
+    </div>
+
+    <div class="note">
+        <strong>Observation:</strong> Street and Sidewalk Cleaning dominates overall volume, but
+        Encampment reports have the strongest association with low safety perception in the research
+        literature. The SPI weights encampment and cleaning requests more heavily than graffiti reports
+        based on broken windows theory (Wilson & Kelling, 1982) and MIT Place Pulse findings (Salesses et al., 2013).
+    </div>
+</div>
+
+<!-- ═══ METHOD ═══ -->
+<div id="method" class="sec">
+    <div class="label">Transparency</div>
+    <h2>Data Sources & Methodology</h2>
+
+    <h3>Data Sources</h3>
+    <table>
+        <tr><th>Dataset</th><th>Source</th><th>Records</th><th>Period</th><th>Role in SPI</th></tr>
+        <tr><td>311 Service Requests</td><td>DataSF <span class="badge">vw6y-z8j6</span></td><td>626,911</td><td>Feb 2025–Feb 2026</td><td>Disorder density, composition, temporal patterns</td></tr>
+        <tr><td>SFPD Incident Reports</td><td>DataSF <span class="badge">wg3w-h783</span></td><td>85,804</td><td>Feb 2025–Feb 2026</td><td>Crime rate, divergence analysis</td></tr>
+        <tr><td>Traffic Crashes</td><td>DataSF <span class="badge">ubvf-ztfx</span></td><td>2,497</td><td>Last 12 months</td><td>Not yet integrated (available)</td></tr>
+        <tr><td>Reddit Posts</td><td>Reddit API (r/sanfrancisco)</td><td>319</td><td>Various</td><td>Not yet integrated (available)</td></tr>
+        <tr><td>City Performance Survey</td><td>SF Controller's Office</td><td>—</td><td>2023 (most recent)</td><td>Calibration reference</td></tr>
+        <tr><td>CityBeat Poll</td><td>SF Chamber of Commerce</td><td>—</td><td>2025</td><td>Calibration reference</td></tr>
+    </table>
+
+    <h3>SPI Computation</h3>
+    <p class="prose">
+        The Safety Perception Index combines five normalized components at the neighborhood level:
+    </p>
+    <table>
+        <tr><th>Component</th><th>Weight</th><th>Source</th><th>Rationale</th></tr>
+        <tr><td>Disorder Density (D)</td><td>35%</td><td>311 cases / km²</td><td>Strongest perception driver per broken windows research</td></tr>
+        <tr><td>Crime Rate (C)</td><td>25%</td><td>SFPD incidents / km²</td><td>Contributes to perception but less than visible disorder</td></tr>
+        <tr><td>Disorder Composition (DC)</td><td>20%</td><td>Category salience weighting</td><td>Encampments and waste affect perception more than graffiti</td></tr>
+        <tr><td>Night Concentration (N)</td><td>10%</td><td>Night-to-day report ratio</td><td>Nighttime activity amplifies perception of unsafety</td></tr>
+        <tr><td>Trend Direction (T)</td><td>10%</td><td>3-month change</td><td>Worsening conditions feel worse than stable ones</td></tr>
+    </table>
+    <p class="prose" style="font-family:'JetBrains Mono',monospace;font-size:13px;background:#F3F4F6;padding:12px 16px;border-radius:6px;">
+        SPI = 100 − (0.35×D + 0.25×C + 0.20×DC + 0.10×N + 0.10×T)
+    </p>
+
+    <h3>Known Limitations</h3>
+    <p class="prose">
+        <strong>Reporting bias:</strong> 311 data reflects who reports, not what exists. Neighborhoods with engaged
+        residents over-report; areas where people have given up under-report.<br>
+        <strong>Survival bias:</strong> Areas people actively avoid generate fewer data points and may appear safer
+        than they feel. Mobility data (Replica/SafeGraph) would help address this but is not yet integrated.<br>
+        <strong>No direct perception:</strong> This entire dashboard is built from proxy data. We are inferring
+        how people feel from what they report and where incidents occur. Phase 1 would collect the actual signal.<br>
+        <strong>Weight calibration:</strong> Component weights are based on research literature, not empirical
+        calibration against SF perception data. Phase 1 would enable proper calibration.
+    </p>
+</div>
+
+<!-- ═══ ASK ═══ -->
+<div id="ask" class="sec">
+    <div class="dark">
+        <h3>Everything you just saw is proxy data — our best inference.</h3>
+        <p>
+            311 only captures what people report. Crime data only captures what police file.
+            Areas people avoid appear safe. We need the actual signal — how people <em>feel</em>,
+            in the moment, at the places they actually are.
+        </p>
+    </div>
+
+    <h3>What Phase 1 Unlocks</h3>
+    <table>
+        <tr><th>What We Have Now (Proxy)</th><th>What Phase 1 Adds (Direct)</th></tr>
+        <tr><td>311 complaints — lagging, reporter bias</td><td>Direct, in-the-moment perception</td></tr>
+        <tr><td>Crime incidents — only what gets reported</td><td>Real-time safety sentiment</td></tr>
+        <tr><td>Biennial survey — 2-year lag, neighborhood level</td><td>Daily signal, block level</td></tr>
+        <tr><td>Proxy-based SPI — inferred from observable data</td><td>Calibrated index with ground truth</td></tr>
+    </table>
+
+    <h3>How It Works</h3>
+    <p class="prose">
+        A single, optional question — <em>"Right now, how does the surrounding area feel to you?"</em> —
+        delivered through existing digital touchpoints during normal daily activity.
+        Comfortable / Neutral / Uncomfortable. Anonymous. Aggregated by place and time.
+    </p>
+
+    <div class="channels">
+        <div class="ch"><div class="t">Offices & Buildings</div><div class="d">Employee check-in (Envoy), workplace comms, visitor sign-in</div></div>
+        <div class="ch"><div class="t">Stores & Restaurants</div><div class="d">Point of sale — Square, Toast, Clover, Apple Pay</div></div>
+        <div class="ch"><div class="t">Transit</div><div class="d">BART / Muni, Uber / Lyft / Waymo, Google Maps, parking</div></div>
+        <div class="ch"><div class="t">Location-Based Apps</div><div class="d">AllTrails, Strava, Yelp, QR feedback in public spaces</div></div>
+    </div>
+
+    <h3>The Feedback Loop</h3>
+    <p class="prose">
+        Phase 1 validates signal quality. Phase 2 builds a <strong>correlation engine</strong> — mapping which
+        observable conditions (311 categories, time of day, interventions) predict perception scores.
+        Phase 2 also tests <strong>interventions</strong> — cleaning, lighting, ambassadors, street musicians,
+        signage — and measures their impact on near-real-time sentiment. This creates a continuous
+        improvement cycle: measure → correlate → intervene → re-measure.
+    </p>
+
+    <div class="metrics">
+        <div class="m"><div class="v" style="color:#1B3A35">$150–200K</div><div class="l">Phase 1 Investment</div><div class="s">6-month pilot</div></div>
+        <div class="m"><div class="v" style="color:#1B3A35">6 months</div><div class="l">Pilot Duration</div><div class="s">Define → Build → Capture → Evaluate</div></div>
+        <div class="m"><div class="v" style="color:#1B3A35">50K/mo</div><div class="l">Response Target</div><div class="s">Ramp from 5K initial</div></div>
+    </div>
+
+    <div class="dark" style="text-align:center;margin-top:32px;">
+        <h3>Partner with us to validate whether direct sentiment can fill the gap.</h3>
+        <p style="font-size:1rem;color:rgba(255,255,255,0.8);margin-top:8px;">
+            City Science Lab San Francisco × MIT Media Lab City Science
+        </p>
+    </div>
+</div>
+
+</div>
+
+<footer>
+    Public Safety Pulse — City Science Lab San Francisco × MIT Media Lab City Science<br>
+    Data: DataSF Open Data Portal · SF City Performance Survey 2023 · CityBeat 2025 Poll<br>
+    Dashboard generated February 19, 2026 · All data from public sources
+</footer>
+
+<script>
+const SPI = [{"analysis_neighborhood": "Tenderloin", "SPI": 11.5, "DCDI": 0.0, "disorder_count": 42009, "crime_count": 12486, "D_score": 100.0, "C_score": 100.0, "DC_score": 100.0, "N_score": 51.362532411392756, "T_score": 34.11592076302274}, {"analysis_neighborhood": "Mission", "SPI": 13.8, "DCDI": 0.0, "disorder_count": 114804, "crime_count": 11269, "D_score": 100.0, "C_score": 100.0, "DC_score": 93.67377131441816, "N_score": 41.62188360846423, "T_score": 32.97282862674411}, {"analysis_neighborhood": "Nob Hill", "SPI": 16.4, "DCDI": -0.4, "disorder_count": 28177, "crime_count": 2463, "D_score": 90.3920184781214, "C_score": 90.76503537735849, "DC_score": 100.0, "N_score": 57.777498477254305, "T_score": 35.16987469319209}, {"analysis_neighborhood": "Hayes Valley", "SPI": 19.2, "DCDI": 26.8, "disorder_count": 31172, "crime_count": 1985, "D_score": 100.0, "C_score": 73.15005896226415, "DC_score": 95.41689999291918, "N_score": 59.682953938575146, "T_score": 24.198849630238296}, {"analysis_neighborhood": "Chinatown", "SPI": 30.3, "DCDI": -53.1, "disorder_count": 9132, "crime_count": 1696, "D_score": 46.87283459514949, "C_score": 100.0, "DC_score": 95.69193053110884, "N_score": 45.35426179733075, "T_score": 45.787979176526264}, {"analysis_neighborhood": "South of Market", "SPI": 37.2, "DCDI": -62.0, "disorder_count": 43275, "crime_count": 11133, "D_score": 31.731773936316472, "C_score": 93.77526954177897, "DC_score": 97.56966138690528, "N_score": 52.000453338814204, "T_score": 34.96844520940906}, {"analysis_neighborhood": "North Beach", "SPI": 39.0, "DCDI": -24.8, "disorder_count": 10364, "crime_count": 1407, "D_score": 44.33038196672228, "C_score": 69.13325471698113, "DC_score": 91.12209878692296, "N_score": 57.25892097809203, "T_score": 42.62782401902497}, {"analysis_neighborhood": "Western Addition", "SPI": 45.6, "DCDI": -19.4, "disorder_count": 19401, "crime_count": 2676, "D_score": 33.19389195431798, "C_score": 52.594339622641506, "DC_score": 97.87371575806536, "N_score": 76.5913949655612, "T_score": 24.267100977198698}, {"analysis_neighborhood": "Castro/Upper Market", "SPI": 48.4, "DCDI": 1.3, "disorder_count": 25769, "crime_count": 2178, "D_score": 44.089139826339874, "C_score": 42.806603773584904, "DC_score": 89.18926464516392, "N_score": 41.943807471685844, "T_score": 34.096525657799106}, {"analysis_neighborhood": "Financial District/South Beach", "SPI": 49.0, "DCDI": -33.8, "disorder_count": 22662, "crime_count": 4382, "D_score": 27.69518432292717, "C_score": 61.517295597484264, "DC_score": 87.95386300193071, "N_score": 53.958204061538716, "T_score": 29.324303285069288}, {"analysis_neighborhood": "Haight Ashbury", "SPI": 49.6, "DCDI": 18.1, "disorder_count": 22467, "crime_count": 1220, "D_score": 48.04953163095085, "C_score": 29.97248427672956, "DC_score": 88.62771962384141, "N_score": 41.42422865882553, "T_score": 42.306322350845946}, {"analysis_neighborhood": "Russian Hill", "SPI": 50.3, "DCDI": -7.8, "disorder_count": 10684, "crime_count": 1142, "D_score": 34.27434877454125, "C_score": 42.084316037735846, "DC_score": 94.29416978604974, "N_score": 61.54144534217282, "T_score": 21.467670201847422}, {"analysis_neighborhood": "Marina", "SPI": 53.3, "DCDI": -12.0, "disorder_count": 13242, "crime_count": 1765, "D_score": 22.656229949955087, "C_score": 34.689465408805034, "DC_score": 94.21029560546856, "N_score": 87.41998932351478, "T_score": 25.114416475972547}, {"analysis_neighborhood": "Japantown", "SPI": 53.6, "DCDI": -4.3, "disorder_count": 3681, "crime_count": 379, "D_score": 23.617348902861544, "C_score": 27.933372641509436, "DC_score": 95.82292552621176, "N_score": 85.7244544744093, "T_score": 34.10732714138287}, {"analysis_neighborhood": "Pacific Heights", "SPI": 53.8, "DCDI": -7.9, "disorder_count": 11762, "crime_count": 1426, "D_score": 20.12404294452286, "C_score": 28.026729559748425, "DC_score": 94.50373148318894, "N_score": 100.0, "T_score": 32.85809018567639}, {"analysis_neighborhood": "Lone Mountain/USF", "SPI": 54.1, "DCDI": -2.9, "disorder_count": 10718, "crime_count": 1041, "D_score": 25.006124377354965, "C_score": 27.89987135506003, "DC_score": 94.03236151463594, "N_score": 62.9461249603148, "T_score": 50.48798798798799}, {"analysis_neighborhood": "Mission Bay", "SPI": 54.6, "DCDI": -23.4, "disorder_count": 8046, "crime_count": 1654, "D_score": 17.207750545361222, "C_score": 40.634827044025165, "DC_score": 87.09650530365487, "N_score": 89.00874589251684, "T_score": 28.817114093959727}, {"analysis_neighborhood": "Bernal Heights", "SPI": 60.0, "DCDI": -5.7, "disorder_count": 14939, "crime_count": 1705, "D_score": 18.256921657409276, "C_score": 23.93587151841869, "DC_score": 90.34780275332258, "N_score": 51.411721709501116, "T_score": 43.974871501998855}, {"analysis_neighborhood": "Presidio Heights", "SPI": 60.9, "DCDI": -2.1, "disorder_count": 4714, "crime_count": 467, "D_score": 15.12254587450276, "C_score": 17.209610849056602, "DC_score": 94.46302556494489, "N_score": 86.19324949966844, "T_score": 19.584569732937684}, {"analysis_neighborhood": "Bayview Hunters Point", "SPI": 61.3, "DCDI": -14.8, "disorder_count": 30231, "crime_count": 5746, "D_score": 12.513711643617306, "C_score": 27.322352404138773, "DC_score": 98.80055689694267, "N_score": 34.06543038680564, "T_score": 43.684922244759974}, {"analysis_neighborhood": "Outer Richmond", "SPI": 62.9, "DCDI": 1.8, "disorder_count": 18797, "crime_count": 1374, "D_score": 11.485887823626818, "C_score": 9.644541778975741, "DC_score": 98.69949571599365, "N_score": 100.0, "T_score": 9.593023255813947}, {"analysis_neighborhood": "Portola", "SPI": 63.0, "DCDI": -0.3, "disorder_count": 9563, "crime_count": 848, "D_score": 13.634743430714172, "C_score": 13.88888888888889, "DC_score": 100.0, "N_score": 29.611233810838993, "T_score": 57.93117918590012}, {"analysis_neighborhood": "Excelsior", "SPI": 63.3, "DCDI": -5.0, "disorder_count": 11176, "crime_count": 1449, "D_score": 10.243625231434804, "C_score": 15.256485849056602, "DC_score": 98.86635128000344, "N_score": 53.21695388436506, "T_score": 42.51486533753061}, {"analysis_neighborhood": "Outer Mission", "SPI": 63.8, "DCDI": -4.3, "disorder_count": 9772, "crime_count": 1113, "D_score": 13.932731653763348, "C_score": 18.229166666666668, "DC_score": 94.85964844407229, "N_score": 41.02467163686142, "T_score": 37.17047451669596}, {"analysis_neighborhood": "Inner Richmond", "SPI": 63.9, "DCDI": 0.6, "disorder_count": 10156, "crime_count": 836, "D_score": 10.42576671371744, "C_score": 9.858490566037736, "DC_score": 96.47690768110323, "N_score": 66.67517537471753, "T_score": 40.2}, {"analysis_neighborhood": "Potrero Hill", "SPI": 65.3, "DCDI": -7.4, "disorder_count": 7057, "crime_count": 1138, "D_score": 8.624345413771822, "C_score": 15.97596585804133, "DC_score": 85.6394330927296, "N_score": 67.47322210651974, "T_score": 37.66999093381686}, {"analysis_neighborhood": "Inner Sunset", "SPI": 65.8, "DCDI": 1.0, "disorder_count": 10726, "crime_count": 851, "D_score": 11.01090722443218, "C_score": 10.035377358490566, "DC_score": 89.46146310386597, "N_score": 78.73784617999749, "T_score": 20.761189153871285}, {"analysis_neighborhood": "Sunset/Parkside", "SPI": 66.3, "DCDI": -3.3, "disorder_count": 22089, "crime_count": 2533, "D_score": 10.307152106202535, "C_score": 13.577401372212694, "DC_score": 90.80150628466431, "N_score": 55.381057626180855, "T_score": 30.27490182077829}, {"analysis_neighborhood": "Visitacion Valley", "SPI": 67.4, "DCDI": -4.8, "disorder_count": 4768, "crime_count": 772, "D_score": 5.562101186379384, "C_score": 10.345197255574613, "DC_score": 99.97037754269509, "N_score": 50.67451849268326, "T_score": 29.80697847067557}, {"analysis_neighborhood": "Oceanview/Merced/Ingleside", "SPI": 67.5, "DCDI": -0.2, "disorder_count": 7795, "crime_count": 707, "D_score": 5.7157522318564284, "C_score": 5.955188679245283, "DC_score": 93.97241232567681, "N_score": 55.45056923457409, "T_score": 46.46347138203816}, {"analysis_neighborhood": "Noe Valley", "SPI": 68.2, "DCDI": -8.3, "disorder_count": 7975, "crime_count": 1200, "D_score": 11.370603247929054, "C_score": 19.654088050314463, "DC_score": 85.95886138086505, "N_score": 34.64426464003166, "T_score": 22.49408050513023}, {"analysis_neighborhood": "West of Twin Peaks", "SPI": 69.5, "DCDI": -3.4, "disorder_count": 11920, "crime_count": 1482, "D_score": 8.050409611864898, "C_score": 11.497641509433961, "DC_score": 81.57792014532326, "N_score": 62.66537135507192, "T_score": 21.85874623597044}, {"analysis_neighborhood": "Seacliff", "SPI": 69.8, "DCDI": -2.5, "disorder_count": 503, "crime_count": 87, "D_score": 2.5818041832413705, "C_score": 5.129716981132075, "DC_score": 71.98091072833267, "N_score": 35.90385566923132, "T_score": 100.0}, {"analysis_neighborhood": "Lincoln Park", "SPI": 70.2, "DCDI": -0.7, "disorder_count": 196, "crime_count": 46, "D_score": 0.4191796056289833, "C_score": 1.1301100628930818, "DC_score": 69.19742644490374, "N_score": 54.83275916831586, "T_score": 100.0}, {"analysis_neighborhood": "Lakeshore", "SPI": 71.0, "DCDI": -10.2, "disorder_count": 1796, "crime_count": 1367, "D_score": 1.3169327785008522, "C_score": 11.514487870619945, "DC_score": 76.47890384000664, "N_score": 68.7455488080378, "T_score": 35.11705685618729}, {"analysis_neighborhood": "Twin Peaks", "SPI": 73.4, "DCDI": -2.6, "disorder_count": 1913, "crime_count": 273, "D_score": 4.091278497797168, "C_score": 6.706957547169812, "DC_score": 80.50219708003678, "N_score": 55.598805068461445, "T_score": 18.22107081174439}, {"analysis_neighborhood": "Glen Park", "SPI": 75.5, "DCDI": 0.3, "disorder_count": 4476, "crime_count": 372, "D_score": 6.38179562855554, "C_score": 6.0927672955974845, "DC_score": 76.02037795781206, "N_score": 29.125694496303232, "T_score": 25.86206896551724}, {"analysis_neighborhood": "McLaren Park", "SPI": 75.7, "DCDI": -0.1, "disorder_count": 847, "crime_count": 82, "D_score": 0.7763377389965354, "C_score": 0.8633760107816713, "DC_score": 74.66078578984376, "N_score": 39.72788588798735, "T_score": 49.20318725099602}, {"analysis_neighborhood": "Treasure Island", "SPI": 76.1, "DCDI": -5.3, "disorder_count": 458, "crime_count": 311, "D_score": 0.7836092219513239, "C_score": 6.112421383647799, "DC_score": 55.83554615050025, "N_score": 100.0, "T_score": 9.210526315789465}, {"analysis_neighborhood": "Golden Gate Park", "SPI": 77.4, "DCDI": -0.3, "disorder_count": 7041, "crime_count": 660, "D_score": 4.407332409009963, "C_score": 4.745743212149104, "DC_score": 67.06943421133938, "N_score": 43.329672702173355, "T_score": 20.81673306772909}, {"analysis_neighborhood": "Presidio", "SPI": 77.9, "DCDI": -0.0, "disorder_count": 489, "crime_count": 50, "D_score": 0.20916206852303348, "C_score": 0.24567610062893086, "DC_score": 76.66372390981829, "N_score": 57.99261308649001, "T_score": 8.285714285714285}];
+const TIME = [{"neighborhood": "Tenderloin", "window": "Early Morning (5\u20139am)", "cases_per_month": 782.5}, {"neighborhood": "Tenderloin", "window": "Midday (9am\u20131pm)", "cases_per_month": 1160.3}, {"neighborhood": "Tenderloin", "window": "Afternoon (1\u20135pm)", "cases_per_month": 697.3}, {"neighborhood": "Tenderloin", "window": "Evening (5\u20139pm)", "cases_per_month": 377.6}, {"neighborhood": "Tenderloin", "window": "Night (9pm\u20131am)", "cases_per_month": 157.5}, {"neighborhood": "Tenderloin", "window": "Late Night (1\u20135am)", "cases_per_month": 56.2}, {"neighborhood": "Mission", "window": "Early Morning (5\u20139am)", "cases_per_month": 2026.0}, {"neighborhood": "Mission", "window": "Midday (9am\u20131pm)", "cases_per_month": 3059.7}, {"neighborhood": "Mission", "window": "Afternoon (1\u20135pm)", "cases_per_month": 2089.1}, {"neighborhood": "Mission", "window": "Evening (5\u20139pm)", "cases_per_month": 1182.8}, {"neighborhood": "Mission", "window": "Night (9pm\u20131am)", "cases_per_month": 410.5}, {"neighborhood": "Mission", "window": "Late Night (1\u20135am)", "cases_per_month": 62.9}, {"neighborhood": "Nob Hill", "window": "Early Morning (5\u20139am)", "cases_per_month": 363.2}, {"neighborhood": "Nob Hill", "window": "Midday (9am\u20131pm)", "cases_per_month": 776.3}, {"neighborhood": "Nob Hill", "window": "Afternoon (1\u20135pm)", "cases_per_month": 528.2}, {"neighborhood": "Nob Hill", "window": "Evening (5\u20139pm)", "cases_per_month": 343.1}, {"neighborhood": "Nob Hill", "window": "Night (9pm\u20131am)", "cases_per_month": 126.9}, {"neighborhood": "Nob Hill", "window": "Late Night (1\u20135am)", "cases_per_month": 29.8}, {"neighborhood": "Hayes Valley", "window": "Early Morning (5\u20139am)", "cases_per_month": 541.3}, {"neighborhood": "Hayes Valley", "window": "Midday (9am\u20131pm)", "cases_per_month": 780.3}, {"neighborhood": "Hayes Valley", "window": "Afternoon (1\u20135pm)", "cases_per_month": 552.8}, {"neighborhood": "Hayes Valley", "window": "Evening (5\u20139pm)", "cases_per_month": 351.3}, {"neighborhood": "Hayes Valley", "window": "Night (9pm\u20131am)", "cases_per_month": 112.5}, {"neighborhood": "Hayes Valley", "window": "Late Night (1\u20135am)", "cases_per_month": 59.6}, {"neighborhood": "Chinatown", "window": "Early Morning (5\u20139am)", "cases_per_month": 122.1}, {"neighborhood": "Chinatown", "window": "Midday (9am\u20131pm)", "cases_per_month": 283.0}, {"neighborhood": "Chinatown", "window": "Afternoon (1\u20135pm)", "cases_per_month": 167.9}, {"neighborhood": "Chinatown", "window": "Evening (5\u20139pm)", "cases_per_month": 86.5}, {"neighborhood": "Chinatown", "window": "Night (9pm\u20131am)", "cases_per_month": 38.2}, {"neighborhood": "Chinatown", "window": "Late Night (1\u20135am)", "cases_per_month": 4.8}, {"neighborhood": "South of Market", "window": "Early Morning (5\u20139am)", "cases_per_month": 850.4}, {"neighborhood": "South of Market", "window": "Midday (9am\u20131pm)", "cases_per_month": 1015.0}, {"neighborhood": "South of Market", "window": "Afternoon (1\u20135pm)", "cases_per_month": 801.8}, {"neighborhood": "South of Market", "window": "Evening (5\u20139pm)", "cases_per_month": 454.4}, {"neighborhood": "South of Market", "window": "Night (9pm\u20131am)", "cases_per_month": 158.5}, {"neighborhood": "South of Market", "window": "Late Night (1\u20135am)", "cases_per_month": 48.7}, {"neighborhood": "North Beach", "window": "Early Morning (5\u20139am)", "cases_per_month": 101.0}, {"neighborhood": "North Beach", "window": "Midday (9am\u20131pm)", "cases_per_month": 268.5}, {"neighborhood": "North Beach", "window": "Afternoon (1\u20135pm)", "cases_per_month": 225.5}, {"neighborhood": "North Beach", "window": "Evening (5\u20139pm)", "cases_per_month": 142.2}, {"neighborhood": "North Beach", "window": "Night (9pm\u20131am)", "cases_per_month": 48.2}, {"neighborhood": "North Beach", "window": "Late Night (1\u20135am)", "cases_per_month": 11.7}, {"neighborhood": "Western Addition", "window": "Early Morning (5\u20139am)", "cases_per_month": 254.5}, {"neighborhood": "Western Addition", "window": "Midday (9am\u20131pm)", "cases_per_month": 505.5}, {"neighborhood": "Western Addition", "window": "Afternoon (1\u20135pm)", "cases_per_month": 352.8}, {"neighborhood": "Western Addition", "window": "Evening (5\u20139pm)", "cases_per_month": 245.5}, {"neighborhood": "Western Addition", "window": "Night (9pm\u20131am)", "cases_per_month": 85.2}, {"neighborhood": "Western Addition", "window": "Late Night (1\u20135am)", "cases_per_month": 48.8}, {"neighborhood": "Castro/Upper Market", "window": "Early Morning (5\u20139am)", "cases_per_month": 407.0}, {"neighborhood": "Castro/Upper Market", "window": "Midday (9am\u20131pm)", "cases_per_month": 593.8}, {"neighborhood": "Castro/Upper Market", "window": "Afternoon (1\u20135pm)", "cases_per_month": 575.0}, {"neighborhood": "Castro/Upper Market", "window": "Evening (5\u20139pm)", "cases_per_month": 310.8}, {"neighborhood": "Castro/Upper Market", "window": "Night (9pm\u20131am)", "cases_per_month": 71.2}, {"neighborhood": "Castro/Upper Market", "window": "Late Night (1\u20135am)", "cases_per_month": 24.5}, {"neighborhood": "Financial District/South Beach", "window": "Early Morning (5\u20139am)", "cases_per_month": 511.0}, {"neighborhood": "Financial District/South Beach", "window": "Midday (9am\u20131pm)", "cases_per_month": 481.5}, {"neighborhood": "Financial District/South Beach", "window": "Afternoon (1\u20135pm)", "cases_per_month": 415.5}, {"neighborhood": "Financial District/South Beach", "window": "Evening (5\u20139pm)", "cases_per_month": 219.3}, {"neighborhood": "Financial District/South Beach", "window": "Night (9pm\u20131am)", "cases_per_month": 76.7}, {"neighborhood": "Financial District/South Beach", "window": "Late Night (1\u20135am)", "cases_per_month": 39.2}, {"neighborhood": "Haight Ashbury", "window": "Early Morning (5\u20139am)", "cases_per_month": 198.7}, {"neighborhood": "Haight Ashbury", "window": "Midday (9am\u20131pm)", "cases_per_month": 581.1}, {"neighborhood": "Haight Ashbury", "window": "Afternoon (1\u20135pm)", "cases_per_month": 598.4}, {"neighborhood": "Haight Ashbury", "window": "Evening (5\u20139pm)", "cases_per_month": 263.8}, {"neighborhood": "Haight Ashbury", "window": "Night (9pm\u20131am)", "cases_per_month": 63.2}, {"neighborhood": "Haight Ashbury", "window": "Late Night (1\u20135am)", "cases_per_month": 23.1}, {"neighborhood": "Russian Hill", "window": "Early Morning (5\u20139am)", "cases_per_month": 139.2}, {"neighborhood": "Russian Hill", "window": "Midday (9am\u20131pm)", "cases_per_month": 284.0}, {"neighborhood": "Russian Hill", "window": "Afternoon (1\u20135pm)", "cases_per_month": 207.2}, {"neighborhood": "Russian Hill", "window": "Evening (5\u20139pm)", "cases_per_month": 132.8}, {"neighborhood": "Russian Hill", "window": "Night (9pm\u20131am)", "cases_per_month": 43.2}, {"neighborhood": "Russian Hill", "window": "Late Night (1\u20135am)", "cases_per_month": 15.5}];
+const CAT_HOOD = [{"neighborhood": "Tenderloin", "category": "Street and Sidewalk Cleaning", "count": 25800}, {"neighborhood": "Tenderloin", "category": "Encampment", "count": 4852}, {"neighborhood": "Tenderloin", "category": "General Request", "count": 3033}, {"neighborhood": "Tenderloin", "category": "Graffiti Public", "count": 2580}, {"neighborhood": "Tenderloin", "category": "Graffiti Private", "count": 1982}, {"neighborhood": "Mission", "category": "Street and Sidewalk Cleaning", "count": 57822}, {"neighborhood": "Mission", "category": "Graffiti Public", "count": 25306}, {"neighborhood": "Mission", "category": "Graffiti Private", "count": 8579}, {"neighborhood": "Mission", "category": "Encampment", "count": 7906}, {"neighborhood": "Mission", "category": "General Request", "count": 6132}, {"neighborhood": "Nob Hill", "category": "Street and Sidewalk Cleaning", "count": 18470}, {"neighborhood": "Nob Hill", "category": "Graffiti Public", "count": 2185}, {"neighborhood": "Nob Hill", "category": "General Request", "count": 1891}, {"neighborhood": "Nob Hill", "category": "Encampment", "count": 1686}, {"neighborhood": "Nob Hill", "category": "Graffiti Private", "count": 1565}, {"neighborhood": "Hayes Valley", "category": "Street and Sidewalk Cleaning", "count": 16976}, {"neighborhood": "Hayes Valley", "category": "Graffiti Public", "count": 4380}, {"neighborhood": "Hayes Valley", "category": "Encampment", "count": 2759}, {"neighborhood": "Hayes Valley", "category": "General Request", "count": 2128}, {"neighborhood": "Hayes Valley", "category": "Graffiti Private", "count": 1915}, {"neighborhood": "Chinatown", "category": "Street and Sidewalk Cleaning", "count": 5441}, {"neighborhood": "Chinatown", "category": "Graffiti Public", "count": 970}, {"neighborhood": "Chinatown", "category": "General Request", "count": 703}, {"neighborhood": "Chinatown", "category": "Graffiti Private", "count": 430}, {"neighborhood": "Chinatown", "category": "Encampment", "count": 421}];
+const CATS = [{"name": "Street and Sidewalk Cleaning", "count": 341901}, {"name": "Graffiti Public", "count": 87954}, {"name": "General Request", "count": 45884}, {"name": "Encampment", "count": 42010}, {"name": "Graffiti Private", "count": 27608}, {"name": "Blocked Street and Sidewalk", "count": 15068}, {"name": "Noise", "count": 12932}, {"name": "Sewer", "count": 11677}, {"name": "RPD General", "count": 10919}, {"name": "Litter Receptacle Maintenance", "count": 9428}, {"name": "Illegal Postings", "count": 8909}, {"name": "Damage Property", "count": 7717}];
+const HOURLY_311 = [{"hour": 0, "count": 3695}, {"hour": 1, "count": 3132}, {"hour": 2, "count": 2670}, {"hour": 3, "count": 2407}, {"hour": 4, "count": 2898}, {"hour": 5, "count": 4584}, {"hour": 6, "count": 15347}, {"hour": 7, "count": 42852}, {"hour": 8, "count": 58364}, {"hour": 9, "count": 59193}, {"hour": 10, "count": 58352}, {"hour": 11, "count": 48907}, {"hour": 12, "count": 44304}, {"hour": 13, "count": 40641}, {"hour": 14, "count": 39866}, {"hour": 15, "count": 41030}, {"hour": 16, "count": 39901}, {"hour": 17, "count": 33221}, {"hour": 18, "count": 23526}, {"hour": 19, "count": 18868}, {"hour": 20, "count": 15822}, {"hour": 21, "count": 11665}, {"hour": 22, "count": 10022}, {"hour": 23, "count": 5644}];
+const MONTHLY_311 = [{"month": "2025-02", "count": 19765}, {"month": "2025-03", "count": 46468}, {"month": "2025-04", "count": 46882}, {"month": "2025-05", "count": 51112}, {"month": "2025-06", "count": 55243}, {"month": "2025-07", "count": 60643}, {"month": "2025-08", "count": 62715}, {"month": "2025-09", "count": 60032}, {"month": "2025-10", "count": 55336}, {"month": "2025-11", "count": 45613}, {"month": "2025-12", "count": 45930}, {"month": "2026-01", "count": 52322}, {"month": "2026-02", "count": 24850}];
+const MONTHLY_SFPD = [{"month": "2025-02", "count": 1602}, {"month": "2025-03", "count": 7823}, {"month": "2025-04", "count": 7349}, {"month": "2025-05", "count": 7741}, {"month": "2025-06", "count": 6999}, {"month": "2025-07", "count": 7487}, {"month": "2025-08", "count": 7640}, {"month": "2025-09", "count": 7365}, {"month": "2025-10", "count": 7691}, {"month": "2025-11", "count": 7300}, {"month": "2025-12", "count": 7005}, {"month": "2026-01", "count": 6611}, {"month": "2026-02", "count": 3191}];
+
+const LAYOUT = {
+    font: { family: 'DM Sans, sans-serif', color: '#374151', size: 12 },
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: { l: 10, r: 10, t: 10, b: 10 },
+    hovermode: 'closest',
+};
+
+function show(id, btn) {
+    document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+}
+
+// SPI bar chart
+const spiSorted = [...SPI].sort((a,b) => a.SPI - b.SPI);
+const spiColor = spiSorted.map(d => d.SPI < 30 ? '#D4594E' : d.SPI < 50 ? '#D4A03C' : d.SPI < 70 ? '#6BB8F0' : '#2D8B4E');
+Plotly.newPlot('spi-chart', [{
+    y: spiSorted.map(d => d.analysis_neighborhood),
+    x: spiSorted.map(d => d.SPI),
+    type: 'bar', orientation: 'h',
+    marker: { color: spiColor },
+    text: spiSorted.map(d => d.SPI.toFixed(1)),
+    textposition: 'outside',
+    textfont: { family: 'JetBrains Mono', size: 11 },
+    hovertemplate: '%{y}<br>SPI: %{x:.1f}<br>Disorder: %{customdata[0]:,.0f}<br>Crime: %{customdata[1]:,.0f}<extra></extra>',
+    customdata: spiSorted.map(d => [d.disorder_count, d.crime_count]),
+}], {
+    ...LAYOUT,
+    margin: { l: 180, r: 60, t: 10, b: 30 },
+    xaxis: { range: [0, 105], gridcolor: '#F3F4F6', title: 'Safety Perception Index (0 = least safe, 100 = safest)' },
+    yaxis: { autorange: 'reversed' },
+}, {responsive: true});
+
+// DCDI chart
+const dcdiSorted = [...SPI].filter(d => d.disorder_count > 500).sort((a,b) => b.DCDI - a.DCDI);
+Plotly.newPlot('dcdi-chart', [{
+    y: dcdiSorted.map(d => d.analysis_neighborhood),
+    x: dcdiSorted.map(d => d.DCDI),
+    type: 'bar', orientation: 'h',
+    marker: { color: dcdiSorted.map(d => d.DCDI > 10 ? '#D4A03C' : d.DCDI < -10 ? '#D4594E' : '#6B7280') },
+    text: dcdiSorted.map(d => d.DCDI > 10 ? 'Perception Gap' : d.DCDI < -10 ? 'Hidden Risk' : 'Aligned'),
+    textposition: 'outside',
+    textfont: { size: 10 },
+    hovertemplate: '%{y}<br>DCDI: %{x:+.1f}<extra></extra>',
+}], {
+    ...LAYOUT,
+    margin: { l: 180, r: 100, t: 10, b: 30 },
+    xaxis: { gridcolor: '#F3F4F6', zeroline: true, zerolinecolor: '#374151', zerolinewidth: 2, title: '← More Crime Than Disorder | More Disorder Than Crime →' },
+}, {responsive: true});
+
+// Hourly chart
+Plotly.newPlot('hourly-chart', [{
+    x: HOURLY_311.map(d => d.hour),
+    y: HOURLY_311.map(d => d.count),
+    type: 'bar',
+    marker: { color: HOURLY_311.map(d => (d.hour >= 20 || d.hour < 6) ? '#1B3A35' : '#D4A03C') },
+    hovertemplate: '%{x}:00<br>%{y:,.0f} cases<extra></extra>',
+}], {
+    ...LAYOUT,
+    margin: { l: 50, r: 20, t: 10, b: 40 },
+    xaxis: { title: 'Hour of Day', tickvals: Array.from({length:12}, (_,i)=>i*2), gridcolor: '#F3F4F6' },
+    yaxis: { title: '311 Cases', gridcolor: '#F3F4F6' },
+    shapes: [
+        {type:'rect',x0:-0.5,x1:5.5,y0:0,y1:1,yref:'paper',fillcolor:'rgba(27,58,53,0.06)',line:{width:0}},
+        {type:'rect',x0:19.5,x1:23.5,y0:0,y1:1,yref:'paper',fillcolor:'rgba(27,58,53,0.06)',line:{width:0}},
+    ],
+}, {responsive: true});
+
+// Time heatmap
+const hoods = [...new Set(TIME.map(d => d.neighborhood))];
+const windows = [...new Set(TIME.map(d => d.window))];
+const z = hoods.map(h => windows.map(w => {
+    const match = TIME.find(d => d.neighborhood === h && d.window === w);
+    return match ? match.cases_per_month : 0;
+}));
+Plotly.newPlot('time-heatmap', [{
+    z: z, x: windows, y: hoods, type: 'heatmap',
+    colorscale: [[0,'#FAF7F2'],[0.3,'#FFC300'],[0.6,'#E3611C'],[1,'#5A1846']],
+    hovertemplate: '%{y}<br>%{x}<br>%{z:.0f} cases/month<extra></extra>',
+}], {
+    ...LAYOUT,
+    margin: { l: 180, r: 10, t: 10, b: 80 },
+    xaxis: { tickangle: -30 },
+}, {responsive: true});
+
+// Category by hood
+const ch_hoods = [...new Set(CAT_HOOD.map(d => d.neighborhood))];
+const ch_cats = [...new Set(CAT_HOOD.map(d => d.category))];
+const colors5 = ['#D4594E','#D4A03C','#3B82C8','#2D8B4E','#7C3AED'];
+const traces = ch_cats.map((cat, i) => ({
+    name: cat,
+    y: ch_hoods.map(h => { const m = CAT_HOOD.find(d => d.neighborhood === h && d.category === cat); return m ? m.count : 0; }),
+    x: ch_hoods,
+    type: 'bar',
+    marker: { color: colors5[i % 5] },
+}));
+Plotly.newPlot('cat-hood-chart', traces, {
+    ...LAYOUT,
+    barmode: 'stack',
+    margin: { l: 50, r: 10, t: 10, b: 120 },
+    xaxis: { tickangle: -30 },
+    yaxis: { title: 'Cases', gridcolor: '#F3F4F6' },
+    legend: { orientation: 'h', y: -0.35, font: { size: 10 } },
+}, {responsive: true});
+
+// Monthly trend
+Plotly.newPlot('monthly-chart', [
+    { x: MONTHLY_311.map(d=>d.month), y: MONTHLY_311.map(d=>d.count), name:'311 Disorder', mode:'lines+markers', line:{color:'#D4594E',width:2.5}, marker:{size:5} },
+    { x: MONTHLY_SFPD.map(d=>d.month), y: MONTHLY_SFPD.map(d=>d.count), name:'SFPD Incidents', mode:'lines+markers', line:{color:'#7C3AED',width:2.5}, marker:{size:5} },
+], {
+    ...LAYOUT,
+    margin: { l: 50, r: 20, t: 10, b: 40 },
+    xaxis: { gridcolor:'#F3F4F6' },
+    yaxis: { title:'Monthly Cases', gridcolor:'#F3F4F6' },
+    legend: { orientation:'h', y:-0.15 },
+}, {responsive: true});
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "generated": "2026-02-19T22:10:57.568243",
+  "neighborhoods": 41,
+  "total_records": 1479410,
+  "spi_mean": 77.3,
+  "spi_std": 19.1,
+  "bottom_5": {
+    "Tenderloin": 0.0,
+    "Mission": 31.0,
+    "Nob Hill": 46.0,
+    "Hayes Valley": 46.3,
+    "South of Market": 56.6
+  },
+  "top_5": {
+    "McLaren Park": 100.0,
+    "Lincoln Park": 99.0,
+    "Presidio": 98.4,
+    "Seacliff": 95.7,
+    "Twin Peaks": 92.4
+  }
+}

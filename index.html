@@ -80,7 +80,6 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 .card{background:var(--white);border-radius:var(--r);padding:22px;box-shadow:var(--sh);margin-bottom:16px}
 
 /* MAP */
-.map-wrap{position:relative;width:100%;height:560px;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh2);background:#1a1a2e}
 #map{width:100%;height:100%;z-index:1}
 .leaflet-container{background:#1a1a2e}
 .map-ctrl{position:absolute;top:14px;left:14px;z-index:1000;background:rgba(27,58,53,.92);backdrop-filter:blur(12px);padding:12px 16px;border-radius:var(--r);color:var(--cream);min-width:220px}
@@ -156,16 +155,58 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 /* FOOTER */
 .ftr{background:var(--dk);color:var(--cream);padding:18px 28px;font-size:.7rem;opacity:.65;text-align:center}
 
+/* ─── FOOTNOTE / CITATION SYSTEM ─── */
+sup.fn{font-size:.55em;font-weight:700;color:var(--coral);cursor:pointer;vertical-align:super;line-height:0;padding:0 1px;transition:color .15s}
+sup.fn:hover{color:var(--coral-lt);text-decoration:underline}
+.refs{border-top:1px solid var(--sand);padding-top:18px;margin-top:36px}
+.refs-title{font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:10px;font-weight:600}
+.refs ol{list-style:none;padding:0;margin:0;counter-reset:ref}
+.refs li{font-size:.72rem;color:var(--t3);line-height:1.55;margin-bottom:6px;padding-left:20px;position:relative;counter-increment:ref}
+.refs li::before{content:counter(ref);position:absolute;left:0;top:0;font-size:.6rem;font-weight:700;color:var(--coral);width:16px;text-align:right}
+.refs li em{font-style:italic;color:var(--t2)}
+
+/* ─── SECTION DIVIDER ─── */
+.sec-div{width:40px;height:3px;background:var(--coral);border-radius:2px;margin:4px 0 22px}
+
+/* ─── FADE ANIMATION ─── */
+.pnl.on{animation:fadeUp .35s ease-out}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── PULLQUOTE ─── */
+.pq{position:relative;padding:22px 0 22px 26px;margin:24px 0;border-left:3px solid var(--coral)}
+.pq-text{font-family:var(--ff);font-size:1.2rem;color:var(--dk);line-height:1.35}
+.pq-attr{font-size:.78rem;color:var(--t3);margin-top:8px}
+
+/* ─── RESEARCH FINDING CARDS ─── */
+.findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:16px 0}
+.rc{background:var(--white);border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh);border-left:3px solid var(--mid);transition:transform .15s ease, box-shadow .15s ease}
+.rc:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.rc-tag{font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--lt);font-weight:700;margin-bottom:6px}
+.rc-finding{font-size:.85rem;color:var(--t1);line-height:1.55;font-weight:500}
+.rc-cite{font-size:.68rem;color:var(--t3);margin-top:8px;font-style:italic}
+
+/* ─── STAT CALLOUT (inline in prose) ─── */
+.sc{display:inline-block;font-weight:700;color:var(--dk);font-size:1.05em}
+.sc.alert{color:var(--coral)}
+
+/* ─── KICKER LABEL ─── */
+.kicker{font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:var(--coral);font-weight:700;margin-bottom:6px}
+
+/* ─── MAP RESPONSIVE FIX ─── */
+.map-wrap{position:relative;width:100%;height:min(560px, 65vh);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh2);background:#1a1a2e}
+
 /* RESPONSIVE */
 @media(max-width:768px){
   .sec{padding:20px 14px}
-  .map-wrap{height:400px}
+  .map-wrap{height:min(400px, 55vh)}
   .mrow{grid-template-columns:1fr 1fr}
   .cmp{grid-template-columns:1fr}
   .bar-l{width:110px;font-size:.65rem}
   .nav button{padding:10px 12px;font-size:.72rem}
   .h2{font-size:1.4rem}
   .hm{font-size:.58rem}
+  .findings{grid-template-columns:1fr}
+  .pq-text{font-size:1rem}
 }
 </style>
 </head>
@@ -192,38 +233,36 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <!-- ═══════════════════════════════════════ -->
 <div class="pnl on" id="p-overview">
 <div class="sec">
-  <div style="margin-bottom:28px">
-    <div style="font-family:var(--ff);font-size:1.5rem;color:var(--dk);line-height:1.3;margin-bottom:6px">"Safety isn't just a statistic; it's a feeling you hold when you're walking down the street."</div>
-    <div style="font-size:.82rem;color:var(--t2);margin-bottom:16px">— Daniel Lurie, Mayor of San Francisco, Inauguration Speech, January 2025</div>
-    <div style="font-family:var(--ff);font-size:1.05rem;color:var(--mid);line-height:1.3;margin-bottom:4px">"Crime stats don't tell the whole story. We are always thinking about ways that we can impact the perception of feeling safe."</div>
-    <div style="font-size:.78rem;color:var(--t3)">— Derrick Lew, SFPD Chief of Police, January 2026</div>
+
+  <div class="pq">
+    <div class="pq-text">"Safety isn't just a statistic; it's a feeling you hold when you're walking down the street."</div>
+    <div class="pq-attr">Daniel Lurie, Mayor of San Francisco — Inauguration, January 2025</div>
   </div>
 
-  <p class="body" style="margin-bottom:20px">San Francisco is making real progress. Crime fell 25% in 2025, homicides hit their lowest level since 1954, and 64% of residents now say the city is headed in the right direction (CityBeat 2026). Perceptions are improving too — nearly 6 in 10 voters say crime has gotten better, and downtown safety perceptions are at their highest levels in years. But a gap persists: the most recent broad-based survey (Partnership for San Francisco, Nov 2025, n=500) found almost half of voters still rate safety as poor or only fair. The 2023 City Survey — the most recent to ask about walking specifically — found only 63% felt safe during the day (down from 85% in 2019) and just 36% at night (down from 53%).</p>
+  <div class="kicker">The progress</div>
+  <div class="h2">Crime is down. Optimism is up. The gap persists.</div>
+  <div class="sec-div"></div>
 
-  <p class="body" style="margin-bottom:20px"><strong>What's largely missing is a direct, ongoing signal from the people who actually experience the city</strong> — residents, workers, visitors — about how safe they feel, where, and when. Some organizations may already collect forms of this data through customer feedback, resident surveys, or service interactions, but it isn't aggregated or used as a safety signal. Crime data tells us what happened. 311 tells us what people reported. Broad surveys happen infrequently. What we lack is a systematic, high-frequency, place-based measure of the ambient feeling of safety that shapes whether someone walks down a street, visits a business, or avoids an area entirely.</p>
+  <p class="body" style="margin-bottom:20px">San Francisco is making real progress. Crime fell <span class="sc">25%</span> in 2025, homicides hit their lowest level since 1954, and <span class="sc">64%</span> of residents now say the city is headed in the right direction.<sup class="fn">1</sup> Nearly 6 in 10 voters say crime has gotten better, and downtown safety perceptions are at their highest levels in years. But a gap persists: the most recent broad-based survey found almost <span class="sc alert">half</span> of voters still rate safety as poor or only fair.<sup class="fn">2</sup> And when asked specifically about walking, only 63% felt safe during the day — down from 85% in 2019 — and just <span class="sc alert">36%</span> at night.<sup class="fn">3</sup></p>
 
   <div class="mrow">
-    <div class="mc"><div class="mv">25%</div><div class="ml">Crime decline in 2025</div><div class="md">SFPD · Lowest homicides since 1954</div></div>
-    <div class="mc"><div class="mv">64%</div><div class="ml">Say SF on right track</div><div class="md">CityBeat 2026 · Up from 22% in 2024</div></div>
-    <div class="mc a"><div class="mv">~48%</div><div class="ml">Rate safety poor or fair</div><div class="md">Partnership for SF · Nov 2025 (n=500)</div></div>
-    <div class="mc a"><div class="mv">36%</div><div class="ml">Feel safe walking at night</div><div class="md">Down from 53% · 2019→2023 City Survey</div></div>
+    <div class="mc"><div class="mv">25%</div><div class="ml">Crime decline in 2025</div><div class="md">Lowest homicides since 1954</div></div>
+    <div class="mc"><div class="mv">64%</div><div class="ml">Say SF on right track</div><div class="md">Up from 22% in 2024</div></div>
+    <div class="mc a"><div class="mv">~48%</div><div class="ml">Rate safety poor or fair</div><div class="md">Most recent broad survey</div></div>
+    <div class="mc a"><div class="mv">36%</div><div class="ml">Feel safe walking at night</div><div class="md">Down from 53% in 2019</div></div>
   </div>
 
-  <div class="ibox">
-    <div class="il">The Missing Signal</div>
-    <p>There is no known high-frequency, place-based dataset that systematically captures how people <em>feel</em> about their safety across San Francisco's neighborhoods. Most existing public data sources — crime reports, 311 calls, transit ridership — are <em>proxies</em>: indirect signals generated after something has already happened or been reported. Some organizations — venues, transit agencies, building managers — may already collect forms of experience feedback from customers and residents, but this data isn't currently aggregated or used as a safety perception signal. <em>Building that aggregated signal is the first step.</em></p>
+  <div class="pq" style="margin-top:8px">
+    <div class="pq-text">"Crime stats don't tell the whole story. We are always thinking about ways that we can impact the perception of feeling safe."</div>
+    <div class="pq-attr">Derrick Lew, SFPD Chief of Police — January 2026</div>
   </div>
 
-  <div class="ibox" style="background:var(--white);color:var(--t1);border:2px solid var(--dk)">
-    <div class="il" style="color:var(--dk)">Why This Matters — What Existing Research Suggests</div>
-    <p style="color:var(--t2)">A growing body of urban research points to a gap between objective safety data and how people experience their environment:</p>
-    <p style="color:var(--t2);margin-top:8px">• <strong>Perceived safety affects walking behavior.</strong> Kim et al. (2024, <em>Frontiers in Public Health</em>) found that pedestrians forgo walking when they feel unsafe, regardless of actual risk — and that both physical safety and perceived safety must be addressed to promote walking. Schneider et al. (2004) similarly found that subjective sense of security significantly affects walking behavior and route choice.</p>
-    <p style="color:var(--t2);margin-top:6px">• <strong>Built environment shapes perception independently of crime.</strong> Ceccato & Bamzar (2022, <em>ScienceDirect</em>) found that informal surveillance (people's presence), visible disorder (trash, graffiti, damaged infrastructure), and building type are more significant predictors of perceived security than police presence — suggesting that factors unmeasured by crime data drive the feeling of safety.</p>
-    <p style="color:var(--t2);margin-top:6px">• <strong>Walkable environments correlate with economic activity.</strong> Yoshimura et al. (2021, MIT Senseable City Lab) found that stores in pedestrianized environments recorded higher sales volumes, with the mechanism tied to store density and foot traffic in areas people feel comfortable walking through.</p>
-    <p style="color:var(--t2);margin-top:6px">• <strong>Safety perception is gendered and context-dependent.</strong> A 2024 CHI study (n=449) found that intersections of identity — gender, age, disability, race — significantly affect safety concerns and walking behavior, meaning a single crime statistic cannot represent how different populations experience the same block.</p>
-    <p style="color:var(--t2);margin-top:8px">Together, these findings suggest that measuring the feeling of safety — directly, at high frequency, in specific places — could provide information that incident data alone cannot, and that this information is relevant to foot traffic, spending, and economic outcomes.</p>
-  </div>
+  <div class="kicker" style="margin-top:36px">The gap</div>
+  <div class="h2">What's largely missing is the direct signal</div>
+  <div class="sec-div"></div>
+
+  <p class="body" style="margin-bottom:16px">There is no known high-frequency, place-based dataset that systematically captures how people <em>feel</em> about their safety across San Francisco's neighborhoods. Most existing public data sources — crime reports, 311 calls, transit ridership — are proxies: indirect signals generated after something has already happened or been reported.</p>
+  <p class="body" style="margin-bottom:24px">Some organizations — venues, transit agencies, building managers — may already collect forms of experience feedback from customers and residents, but this data isn't currently aggregated or used as a safety perception signal. What we lack is a systematic, high-frequency, place-based measure of the ambient feeling of safety that shapes whether someone walks down a street, visits a business, or avoids an area entirely.</p>
 
   <div class="cmp">
     <div class="cmp-c">
@@ -246,12 +285,57 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
     </div>
   </div>
 
-  <div class="card" style="border-left:4px solid var(--coral)">
-    <div class="h3">MVP Approach: Start With What Already Exists</div>
-    <p class="body">Before building new data infrastructure, we're asking: <strong>is anyone already collecting experience data we can use?</strong> Venues ask customers for feedback. City agencies survey constituents. Housing developments check in with residents. Transit systems track satisfaction. If we can aggregate existing sentiment signals — already being captured by businesses, agencies, and building systems — we can build an MVP Public Safety Pulse model and test whether the signal is viable. This dashboard shows the complementary dataset alongside that goal.</p>
+  <div class="kicker" style="margin-top:36px">The evidence</div>
+  <div class="h2">Why perception — not crime data — drives outcomes</div>
+  <div class="sec-div"></div>
+
+  <p class="body" style="margin-bottom:16px">A growing body of urban research suggests that the gap between objective safety data and how people experience their environment has real economic and behavioral consequences.</p>
+
+  <div class="findings">
+    <div class="rc">
+      <div class="rc-tag">Walking behavior</div>
+      <div class="rc-finding">Pedestrians forgo walking when they feel unsafe — regardless of actual risk — and both physical safety and perceived safety must be addressed to promote walking.<sup class="fn">4</sup></div>
+      <div class="rc-cite">Kim et al. · Frontiers in Public Health, 2024</div>
+    </div>
+    <div class="rc">
+      <div class="rc-tag">Perception drivers</div>
+      <div class="rc-finding">Visible disorder (trash, graffiti, damaged infrastructure) and informal surveillance (people's presence) are stronger predictors of perceived security than police presence.<sup class="fn">5</sup></div>
+      <div class="rc-cite">Ceccato & Bamzar · ScienceDirect, 2022</div>
+    </div>
+    <div class="rc">
+      <div class="rc-tag">Economic impact</div>
+      <div class="rc-finding">Stores in pedestrianized environments record higher sales, with the mechanism tied to store density and foot traffic in areas people feel comfortable walking through.<sup class="fn">6</sup></div>
+      <div class="rc-cite">Yoshimura et al. · MIT Senseable City Lab, 2021</div>
+    </div>
+    <div class="rc">
+      <div class="rc-tag">Context dependence</div>
+      <div class="rc-finding">Intersections of identity — gender, age, disability, race — significantly affect safety concerns and walking behavior. A single crime statistic cannot represent how different populations experience the same block.<sup class="fn">7</sup></div>
+      <div class="rc-cite">CHI Conference on Human Factors, 2024 (n=449)</div>
+    </div>
   </div>
 
-  <div style="font-size:.7rem;color:var(--t3);margin-top:12px">Sources: SF City Performance Survey 2019 & 2023, SFPD 2025 Crime Data, CityBeat 2026 Poll (SF Chamber / EMC Research, Jan 2026, n=500), Partnership for San Francisco Insights Survey (EMC Research, Nov 2025, n=500), GrowSF July 2025 Poll. Research: Kim et al. 2024 (<em>Frontiers in Public Health</em>), Schneider et al. 2004, Ceccato & Bamzar 2022, Yoshimura et al. 2021 (MIT Senseable City Lab), CHI 2024.</div>
+  <p class="body" style="margin-top:16px;margin-bottom:24px">Together, these findings suggest that measuring the feeling of safety — directly, at high frequency, in specific places — could provide information that incident data alone cannot, and that this information is relevant to foot traffic, spending, and economic outcomes.</p>
+
+  <div class="card" style="border-left:4px solid var(--coral)">
+    <div class="kicker">MVP approach</div>
+    <div class="h3">Start With What Already Exists</div>
+    <p class="body">Before building new data infrastructure, we're asking: <strong>is anyone already collecting experience data we can use?</strong> Venues ask customers for feedback. City agencies survey constituents. Housing developments check in with residents. Transit systems track satisfaction. If we can aggregate existing sentiment signals — already being captured by businesses, agencies, and building systems — we can build an MVP Public Safety Pulse model and test whether the signal is viable.</p>
+  </div>
+
+  <!-- ─── FOOTNOTES ─── -->
+  <div class="refs">
+    <div class="refs-title">Sources & References</div>
+    <ol>
+      <li>SFPD 2025 Crime Data; CityBeat 2026 Poll, SF Chamber of Commerce / EMC Research, January 2026 (n=500 registered voters).</li>
+      <li>Partnership for San Francisco Insights Survey, EMC Research, November 2025 (n=500 registered voters). Approximately 48% rated safety as "poor" or "only fair."</li>
+      <li>SF City Performance Survey 2023 (most recent to ask about walking safety specifically). Prior benchmark: 2019 City Survey. Methodology changed from phone to multi-mode in 2023; comparisons should be interpreted with caution.</li>
+      <li>Kim, Y., Choi, B., Choi, M., Ahn, S. & Hwang, S. (2024). "Enhancing pedestrian perceived safety through walking environment modification." <em>Frontiers in Public Health</em>, 11:1326468. Schneider, R.J. et al. (2004) similarly found perceived security significantly affects route choice.</li>
+      <li>Ceccato, V. & Bamzar, R. (2022). "The influence of the built environment on pedestrians' perceptions of attractiveness, safety and security." <em>Transportation Research Part F</em>, Elsevier.</li>
+      <li>Yoshimura, Y. et al. (2021). "Street pedestrianization in urban districts." <em>Cities</em>. MIT Senseable City Lab.</li>
+      <li>Understanding Pedestrians' Perception of Safety and Safe Mobility Practices. <em>Proceedings of the 2024 CHI Conference on Human Factors in Computing Systems</em>, ACM (n=449 UK residents).</li>
+    </ol>
+  </div>
+
 </div>
 </div>
 
@@ -262,8 +346,10 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <div class="sec-w">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-bottom:14px">
     <div>
+      <div class="kicker">Complementary data</div>
       <div class="h2">Perception Map</div>
-      <div class="sub" style="margin-bottom:0">This map shows what complementary data can approximate about safety perception. Each neighborhood is scored using 15 indicators — disorder, crime, lighting, transit, business health, and more. Red = conditions associated with lower perceived safety. Green = higher. <strong>What's missing: a direct signal from the people in these neighborhoods about how they actually feel.</strong></div>
+      <div class="sec-div"></div>
+      <div class="sub" style="margin-bottom:0">Each neighborhood is scored using 15 indicators — disorder, crime, lighting, transit, business health, and more. Red = conditions associated with lower perceived safety. Green = higher. <strong>What's missing: a direct signal from the people in these neighborhoods about how they actually feel.</strong></div>
     </div>
   </div>
 
@@ -294,8 +380,10 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <!-- ═══════════════════════════════════════ -->
 <div class="pnl" id="p-index">
 <div class="sec">
-  <div class="h2">Safety Index Rankings</div>
-  <div class="sub">All neighborhoods ranked by a composite score drawn from 15 indicators across 28 complementary data sources. These are updated periodically based on public data releases — typically monthly or quarterly — at the neighborhood level.</div>
+  <div class="kicker">Neighborhood rankings</div>
+  <div class="h2">Safety Index</div>
+  <div class="sec-div"></div>
+  <div class="sub">All neighborhoods ranked by a composite score drawn from 15 indicators across 28 complementary data sources. Updated periodically as public data refreshes — typically monthly or quarterly.</div>
 
   <div class="ibox">
     <div class="il">What This Shows — and What Public Safety Pulse Could Add</div>
@@ -318,8 +406,10 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <!-- ═══════════════════════════════════════ -->
 <div class="pnl" id="p-time">
 <div class="sec">
+  <div class="kicker">Temporal analysis</div>
   <div class="h2">How Safety Conditions Change Day vs. Night</div>
-  <div class="sub">The same neighborhood can feel very different at 10am versus 10pm. This table shows how the Safety Perception Index — the same composite score shown on the previous tabs — shifts across six 4-hour windows based on when incidents and disorder reports occur.</div>
+  <div class="sec-div"></div>
+  <div class="sub">The same neighborhood can feel very different at 10am versus 10pm. This table shows how the Safety Perception Index shifts across six 4-hour windows based on when incidents and disorder reports occur.</div>
 
   <div class="card">
     <div class="h3">Safety Perception Index by Time Window</div>
@@ -348,7 +438,9 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <!-- ═══════════════════════════════════════ -->
 <div class="pnl" id="p-how">
 <div class="sec">
+  <div class="kicker">Methodology</div>
   <div class="h2">How the Complementary Data Model Works</div>
+  <div class="sec-div"></div>
   <div class="sub">We organized 28 public data sources into three layers — things that <em>happened</em>, things you can <em>see and feel</em>, and how people <em>respond</em>. Together they form the complementary dataset. What they don't contain is the missing fourth layer: <strong>what people actually feel</strong>.</div>
 
   <div class="card">
@@ -388,11 +480,11 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
   <div class="ibox" style="border:2px solid var(--coral);background:var(--dk)">
     <div class="il" style="color:var(--coral-lt)">Layer 4: The Missing Signal — Direct Sentiment</div>
     <p>All three layers above are <em>complementary data</em> — they describe conditions, incidents, and behavioral responses. What they don't capture is the <em>ambient, in-the-moment experience</em> of feeling safe or unsafe in a specific place at a specific time.</p>
-    <p style="margin-top:10px">Three reasons this gap matters:</p>
-    <p style="margin-top:6px"><em>1. Perception shapes walking and spending behavior.</em> Kim et al. (2024) found pedestrians forgo walking when they feel unsafe regardless of actual risk. Ceccato & Bamzar (2022) found visible disorder — not crime statistics — is among the strongest predictors of perceived security. A block can be statistically safe but feel threatening. Resources deployed on crime data alone may miss what's actually shaping behavior.</p>
-    <p style="margin-top:6px"><em>2. Proxy data has systematic blind spots.</em> 311 over-represents neighborhoods with engaged reporters. Crime data only captures what's reported. Avoided areas generate less data, appearing artificially safe. These biases compound in any proxy model — including this one.</p>
-    <p style="margin-top:6px"><em>3. Measuring intervention impact requires a feedback loop.</em> Without a direct perception signal at sufficient frequency, it's difficult to know whether a streetlight repair, ambassador deployment, or cleanup initiative actually changed how people feel. The complementary data alone may not provide this at the cadence or granularity needed.</p>
-    <p style="margin-top:10px"><strong>Public Safety Pulse is designed to capture this missing signal</strong> by exploring whether experience data already being collected — by venues, city agencies, transit systems, building management, and other touchpoints — can be aggregated into a high-frequency, place-based sentiment measure that complements the data shown here.</p>
+    <p style="margin-top:12px">Three reasons this gap matters:</p>
+    <p style="margin-top:8px"><em>1. Perception shapes walking and spending behavior.</em> Pedestrians forgo walking when they feel unsafe regardless of actual risk.<sup class="fn" style="color:var(--coral-lt)">1</sup> Visible disorder — not crime statistics — is among the strongest predictors of perceived security.<sup class="fn" style="color:var(--coral-lt)">2</sup> A block can be statistically safe but feel threatening. Resources deployed on crime data alone may miss what's actually shaping behavior.</p>
+    <p style="margin-top:8px"><em>2. Proxy data has systematic blind spots.</em> 311 over-represents neighborhoods with engaged reporters. Crime data only captures what's reported. Avoided areas generate less data, appearing artificially safe. These biases compound in any proxy model — including this one.</p>
+    <p style="margin-top:8px"><em>3. Measuring intervention impact requires a feedback loop.</em> Without a direct perception signal at sufficient frequency, it's difficult to know whether a streetlight repair, ambassador deployment, or cleanup initiative actually changed how people feel. The complementary data alone may not provide this at the cadence or granularity needed.</p>
+    <p style="margin-top:12px"><strong>Public Safety Pulse is designed to capture this missing signal</strong> by exploring whether experience data already being collected — by venues, city agencies, transit systems, building management, and other touchpoints — can be aggregated into a high-frequency, place-based sentiment measure that complements the data shown here.</p>
   </div>
 
   <div style="margin-top:20px">
@@ -430,6 +522,16 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
       <div class="ad">Following CBD cleanup initiative and ambassador expansion. 311 cleaning requests down 25%. Yelp safety-keyword sentiment improved. BART Powell exits up 6% week-over-week.</div>
     </div>
   </div>
+
+  <!-- ─── FOOTNOTES ─── -->
+  <div class="refs">
+    <div class="refs-title">References</div>
+    <ol>
+      <li>Kim, Y. et al. (2024). "Enhancing pedestrian perceived safety through walking environment modification." <em>Frontiers in Public Health</em>, 11:1326468.</li>
+      <li>Ceccato, V. & Bamzar, R. (2022). "The influence of the built environment on pedestrians' perceptions of attractiveness, safety and security." <em>Transportation Research Part F</em>, Elsevier.</li>
+    </ol>
+  </div>
+
 </div>
 </div>
 
@@ -438,7 +540,9 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <!-- ═══════════════════════════════════════ -->
 <div class="pnl" id="p-methods">
 <div class="sec">
+  <div class="kicker">Transparency</div>
   <div class="h2">Data &amp; Methods</div>
+  <div class="sec-div"></div>
   <div class="sub">Full transparency on data sources, methodology, and known limitations.</div>
 
   <div class="card">
@@ -470,7 +574,9 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <!-- ═══════════════════════════════════════ -->
 <div class="pnl" id="p-partners">
 <div class="sec">
+  <div class="kicker">Who we are</div>
   <div class="h2">About the Partners</div>
+  <div class="sec-div"></div>
   <div class="sub">Public Safety Pulse is a collaboration between City Science Lab San Francisco and MIT Media Lab's City Science research group.</div>
 
   <div class="partner-card">
@@ -531,7 +637,9 @@ body{font-family:var(--fb);background:var(--cream);color:var(--t1);min-height:10
 <!-- ═══════════════════════════════════════ -->
 <div class="pnl" id="p-act">
 <div class="sec">
+  <div class="kicker">Get involved</div>
   <div class="h2">Partner With Us</div>
+  <div class="sec-div"></div>
   <div class="sub">The city is improving — but we're missing the data to understand what's still driving the perception gap, and to measure whether interventions are working. Building that signal is the first step.</div>
 
   <div class="ibox">

@@ -1,0 +1,59 @@
+{
+  "generated": "2026-02-19T20:54:48.129702",
+  "version": "SPI v4",
+  "num_neighborhoods": 41,
+  "num_components": 15,
+  "total_records": 1479410,
+  "dataset_counts": {
+    "311_safety": 634700,
+    "sfpd_incidents": 89783,
+    "traffic_crashes": 2497,
+    "fire_calls": 752430
+  },
+  "spi_stats": {
+    "mean": 75.8,
+    "median": 80.1,
+    "min": 0.0,
+    "max": 100.0,
+    "std": 18.5
+  },
+  "bottom_5": {
+    "Tenderloin": 0.0,
+    "Mission": 32.8,
+    "Nob Hill": 44.9,
+    "Hayes Valley": 45.1,
+    "South of Market": 58.9
+  },
+  "top_5": {
+    "McLaren Park": 100.0,
+    "Lincoln Park": 98.4,
+    "Presidio": 96.4,
+    "Seacliff": 93.1,
+    "Twin Peaks": 90.0
+  },
+  "weights": {
+    "disorder_density": 0.18,
+    "crime_severity": 0.14,
+    "disorder_salience": 0.08,
+    "pedestrian_safety": 0.05,
+    "temporal_risk": 0.08,
+    "resolution_responsive": 0.1,
+    "review_sentiment": 0.08,
+    "transit_confidence": 0.06,
+    "lighting_risk": 0.05,
+    "business_vitality": 0.04,
+    "emergency_density": 0.04,
+    "environmental_quality": 0.04,
+    "digital_concern": 0.02,
+    "noise_disorder": 0.02,
+    "waste_odor": 0.02
+  },
+  "time_windows": [
+    "early_morning",
+    "morning",
+    "afternoon",
+    "evening",
+    "night",
+    "late_night"
+  ]
+}
