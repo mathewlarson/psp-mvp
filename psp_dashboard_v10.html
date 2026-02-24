@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Public Safety Pulse — San Francisco</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg-primary: #0a1628;
+  --bg-secondary: #111d33;
+  --bg-card: #162240;
+  --bg-card-hover: #1c2d52;
+  --text-primary: #e8ecf4;
+  --text-secondary: #8899b4;
+  --text-muted: #5a6d8a;
+  --accent-coral: #e85d5d;
+  --accent-amber: #e8a838;
+  --accent-green: #38c97a;
+  --accent-blue: #4a90d9;
+  --accent-teal: #2dd4bf;
+  --accent-purple: #8b5cf6;
+  --border: #1e3050;
+  --layer1: #e85d5d;
+  --layer2: #e8a838;
+  --layer3: #38c97a;
+  --layer4: #4a90d9;
+  --layer5: #8b5cf6;
+  --layer6: #2dd4bf;
+  --spi-terrible: #dc2626;
+  --spi-poor: #e85d5d;
+  --spi-moderate: #e8a838;
+  --spi-fair: #a3e635;
+  --spi-good: #38c97a;
+  --spi-excellent: #059669;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Navigation */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: 52px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  overflow-x: auto;
+}
+
+.nav-brand {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--accent-teal);
+  white-space: nowrap;
+  margin-right: 24px;
+  letter-spacing: -0.02em;
+}
+
+.nav-tab {
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.nav-tab:hover { color: var(--text-primary); }
+.nav-tab.active {
+  color: var(--accent-teal);
+  border-bottom-color: var(--accent-teal);
+}
+
+/* Tab content */
+.tab-content { display: none; padding: 24px 20px; max-width: 1400px; margin: 0 auto; }
+.tab-content.active { display: block; }
+
+/* Section headers */
+h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+}
+
+p { color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; }
+
+/* Cards */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+/* Metrics row */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.02em;
+}
+
+.metric-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+
+/* Map */
+#map-container {
+  width: 100%;
+  height: 520px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.map-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.time-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.time-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+
+.time-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--accent-teal);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.time-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--accent-teal);
+  min-width: 100px;
+}
+
+.btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+.btn.active { background: var(--accent-teal); color: var(--bg-primary); border-color: var(--accent-teal); }
+
+/* Index bars */
+.index-bar-container { margin-bottom: 6px; }
+
+.index-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+}
+
+.index-bar-name {
+  width: 200px;
+  font-size: 12px;
+  text-align: right;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.index-bar-track {
+  flex: 1;
+  height: 14px;
+  background: var(--bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.index-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.index-bar-score {
+  width: 36px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+/* Heatmap grid */
+.heatmap-grid {
+  display: grid;
+  gap: 2px;
+  margin-top: 12px;
+}
+
+.heatmap-cell {
+  padding: 6px 4px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  border-radius: 3px;
+  cursor: default;
+}
+
+.heatmap-header {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.heatmap-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: right;
+  padding-right: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Layer badges */
+.layer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Weight chart */
+.weight-bar-container { margin-bottom: 8px; }
+
+.weight-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+}
+
+.weight-bar-label {
+  width: 180px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+.weight-bar-track {
+  flex: 1;
+  height: 10px;
+  background: var(--bg-secondary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.weight-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.weight-bar-pct {
+  width: 36px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Comparison table */
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.comparison-table th {
+  text-align: left;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border);
+}
+
+.comparison-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.comparison-table tr:hover td { background: var(--bg-card-hover); }
+
+.tag-mvp {
+  background: var(--accent-amber);
+  color: var(--bg-primary);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.tag-phase1 {
+  background: var(--accent-teal);
+  color: var(--bg-primary);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Insight box */
+.insight-box {
+  background: rgba(45, 212, 191, 0.08);
+  border-left: 3px solid var(--accent-teal);
+  padding: 14px 16px;
+  border-radius: 0 8px 8px 0;
+  margin: 16px 0;
+}
+
+.insight-box.warning {
+  background: rgba(232, 168, 56, 0.08);
+  border-left-color: var(--accent-amber);
+}
+
+.insight-box p { color: var(--text-secondary); margin: 0; }
+.insight-box strong { color: var(--text-primary); }
+
+/* Partners */
+.partner-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.partner-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* CTA */
+.cta-box {
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.12), rgba(74, 144, 217, 0.12));
+  border: 1px solid var(--accent-teal);
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+  margin-top: 24px;
+}
+
+.cta-box h2 { color: var(--accent-teal); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-bar { padding: 0 10px; }
+  .nav-tab { padding: 12px 10px; font-size: 12px; }
+  .tab-content { padding: 16px 12px; }
+  .index-bar-name { width: 120px; }
+  #map-container { height: 380px; }
+  .metrics-row { grid-template-columns: repeat(2, 1fr); }
+  .weight-bar-label { width: 120px; }
+}
+
+/* Color scale legend */
+.color-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 12px 0;
+  font-size: 11px;
+}
+
+.color-legend-bar {
+  display: flex;
+  flex: 1;
+  height: 12px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.color-legend-bar span {
+  flex: 1;
+}
+
+/* Alert mockups */
+.alert-mockup {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 8px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.alert-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.alert-content { flex: 1; }
+.alert-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.alert-body { font-size: 12px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<nav class="nav-bar">
+  <span class="nav-brand">◆ Public Safety Pulse</span>
+  <div class="nav-tab active" onclick="switchTab('overview')">Overview</div>
+  <div class="nav-tab" onclick="switchTab('map')">Perception Map</div>
+  <div class="nav-tab" onclick="switchTab('index')">Safety Index</div>
+  <div class="nav-tab" onclick="switchTab('time')">Day vs. Night</div>
+  <div class="nav-tab" onclick="switchTab('howit')">How It Works</div>
+  <div class="nav-tab" onclick="switchTab('methods')">Data & Methods</div>
+  <div class="nav-tab" onclick="switchTab('partners')">Partners</div>
+  <div class="nav-tab" onclick="switchTab('partner')">Partner With Us</div>
+</nav>
+
+<!-- ============================================================ -->
+<!-- TAB 1: OVERVIEW -->
+<!-- ============================================================ -->
+<div id="tab-overview" class="tab-content active">
+  <h2>Safety is a feeling, not a statistic.</h2>
+  <p style="font-size: 15px; color: var(--text-muted); margin-bottom: 24px;">
+    — Mayor Daniel Lurie, Inauguration Address, January 2024
+  </p>
+
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="metric-value" style="color: var(--accent-coral)">63%</div>
+      <div class="metric-label">Feel safe during day</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value" style="color: var(--accent-coral)">36%</div>
+      <div class="metric-label">Feel safe at night</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value" style="color: var(--accent-green)">~35%</div>
+      <div class="metric-label">Crime declined since 2019</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value" style="color: var(--accent-amber)">2 yrs</div>
+      <div class="metric-label">Between city surveys</div>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <p><strong>The perception gap:</strong> Crime has dropped substantially, but residents don't feel it. The City Survey runs every two years with neighborhood-level granularity. Public Safety Pulse fills this gap with daily, block-level perception estimates from 28+ data sources across 6 signal layers.</p>
+  </div>
+
+  <div class="card">
+    <h3>What PSP Measures Today vs. Phase 1</h3>
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th><span class="tag-mvp">MVP</span> Proxy Data</th>
+          <th><span class="tag-phase1">Phase 1</span> Direct Signal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Perception source</td>
+          <td>311 reports, Yelp, Reddit, Google Trends</td>
+          <td>Direct NPS: "How safe do you feel right now?"</td>
+        </tr>
+        <tr>
+          <td>Refresh rate</td>
+          <td>Daily batch</td>
+          <td>Near real-time (hourly)</td>
+        </tr>
+        <tr>
+          <td>Spatial resolution</td>
+          <td>Neighborhood (41 polygons)</td>
+          <td>Block-level (hex grid)</td>
+        </tr>
+        <tr>
+          <td>Signal layers</td>
+          <td>6 layers, 23 components, 28+ sources</td>
+          <td>6 layers + direct perception collection</td>
+        </tr>
+        <tr>
+          <td>Denominator</td>
+          <td>None (incident counts only)</td>
+          <td>Foot traffic normalization (events per visitor)</td>
+        </tr>
+        <tr>
+          <td>Demographics</td>
+          <td>Not stratified</td>
+          <td>Age, gender, resident vs. visitor</td>
+        </tr>
+        <tr>
+          <td>Interventions</td>
+          <td>311 resolution analysis only</td>
+          <td>Pre/during/post causal measurement</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Data Foundation</h3>
+    <div class="metrics-row" style="margin-bottom: 0;">
+      <div class="metric-card">
+        <div class="metric-value" style="color: var(--accent-teal)" id="total-records">~2.7M</div>
+        <div class="metric-label">Total records</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" style="color: var(--accent-blue)">28+</div>
+        <div class="metric-label">Data sources</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" style="color: var(--accent-purple)">6</div>
+        <div class="metric-label">Signal layers</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" style="color: var(--accent-green)">41</div>
+        <div class="metric-label">Neighborhoods</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 2: PERCEPTION MAP -->
+<!-- ============================================================ -->
+<div id="tab-map" class="tab-content">
+  <h2>Perception Map</h2>
+
+  <div class="map-controls">
+    <div class="time-slider-container">
+      <span style="font-size: 12px; color: var(--text-muted);">Time:</span>
+      <input type="range" class="time-slider" id="time-slider" min="0" max="5" value="2">
+      <span class="time-label" id="time-label">Midday</span>
+    </div>
+    <button class="btn" id="btn-animate" onclick="toggleAnimate()">▶ Animate</button>
+    <button class="btn" id="btn-layer" onclick="cycleLayer()">Overall SPI</button>
+  </div>
+
+  <div class="color-legend">
+    <span style="color: var(--text-muted);">Poor</span>
+    <div class="color-legend-bar">
+      <span style="background: var(--spi-terrible);"></span>
+      <span style="background: var(--spi-poor);"></span>
+      <span style="background: var(--spi-moderate);"></span>
+      <span style="background: var(--spi-fair);"></span>
+      <span style="background: var(--spi-good);"></span>
+      <span style="background: var(--spi-excellent);"></span>
+    </div>
+    <span style="color: var(--text-muted);">Excellent</span>
+  </div>
+
+  <div id="map-container"></div>
+
+  <div class="insight-box" style="margin-top: 16px;">
+    <p><strong>What you're seeing:</strong> Each polygon represents one of SF's 41 neighborhoods, colored by its Safety Perception Index score. This is a composite of 23 measurable factors across 6 layers — not direct perception measurement. <strong>What you're not seeing:</strong> How people actually feel. That's what Phase 1 will measure.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 3: SAFETY INDEX -->
+<!-- ============================================================ -->
+<div id="tab-index" class="tab-content">
+  <h2>Safety Perception Index — All Neighborhoods</h2>
+
+  <div class="insight-box warning">
+    <p><strong>Important caveat:</strong> These scores are <em>not</em> direct measures of how safe people feel. They are composite indices of 23 proxy indicators. Phase 1 will validate and calibrate these proxies against direct perception data.</p>
+  </div>
+
+  <div id="index-bars"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 4: DAY VS NIGHT -->
+<!-- ============================================================ -->
+<div id="tab-time" class="tab-content">
+  <h2>Day vs. Night Conditions</h2>
+  <p>Read across a row to see how one neighborhood changes throughout the day. Read down a column to compare neighborhoods at the same time.</p>
+
+  <div class="color-legend" style="max-width: 300px;">
+    <span style="font-size: 10px; color: var(--spi-terrible);">■ Poor</span>
+    <span style="font-size: 10px; color: var(--spi-moderate);">■ Moderate</span>
+    <span style="font-size: 10px; color: var(--spi-fair);">■ Fair</span>
+    <span style="font-size: 10px; color: var(--spi-good);">■ Good</span>
+  </div>
+
+  <div id="time-heatmap" class="card" style="overflow-x: auto;"></div>
+
+  <div class="metrics-row" style="margin-top: 16px;" id="time-stats"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 5: HOW IT WORKS -->
+<!-- ============================================================ -->
+<div id="tab-howit" class="tab-content">
+  <h2>How the 6-Layer Model Works</h2>
+  <p>PSP fuses signals from six distinct layers to estimate perceived safety. Each layer captures a different dimension of the urban experience.</p>
+
+  <div class="card">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+      <div style="border-left: 3px solid var(--layer1); padding-left: 14px;">
+        <div><span class="layer-badge" style="background: rgba(232,93,93,0.15); color: var(--layer1);">Layer 1</span></div>
+        <h3 style="margin-top: 8px;">What Happened</h3>
+        <p style="font-size: 13px;">Crime incidents, traffic crashes, fire/EMS calls. Lagging indicators — they tell you what already occurred, not what's about to.</p>
+      </div>
+      <div style="border-left: 3px solid var(--layer2); padding-left: 14px;">
+        <div><span class="layer-badge" style="background: rgba(232,168,56,0.15); color: var(--layer2);">Layer 2</span></div>
+        <h3 style="margin-top: 8px;">What It Looks & Feels Like</h3>
+        <p style="font-size: 13px;">311 disorder reports, streetlight outages, noise, waste, tree coverage, resolution times. Ambient conditions shape perception before any incident happens.</p>
+      </div>
+      <div style="border-left: 3px solid var(--layer3); padding-left: 14px;">
+        <div><span class="layer-badge" style="background: rgba(56,201,122,0.15); color: var(--layer3);">Layer 3</span></div>
+        <h3 style="margin-top: 8px;">Who Is Here</h3>
+        <p style="font-size: 13px;">Transit ridership, cycling activity, temporal patterns. "Eyes on the street" — the presence or absence of people is a primary safety signal.</p>
+      </div>
+      <div style="border-left: 3px solid var(--layer4); padding-left: 14px;">
+        <div><span class="layer-badge" style="background: rgba(74,144,217,0.15); color: var(--layer4);">Layer 4</span></div>
+        <h3 style="margin-top: 8px;">The Atmosphere</h3>
+        <p style="font-size: 13px;">Weather, daylight, air quality. A foggy 45°F evening changes every block's perception profile. The same 6 PM in December vs. June is a different city.</p>
+      </div>
+      <div style="border-left: 3px solid var(--layer5); padding-left: 14px;">
+        <div><span class="layer-badge" style="background: rgba(139,92,246,0.15); color: var(--layer5);">Layer 5</span></div>
+        <h3 style="margin-top: 8px;">Economic Vitality</h3>
+        <p style="font-size: 13px;">Business openings/closures, food density, construction permits. Activated storefronts signal care and investment; vacancies signal decay.</p>
+      </div>
+      <div style="border-left: 3px solid var(--layer6); padding-left: 14px;">
+        <div><span class="layer-badge" style="background: rgba(45,212,191,0.15); color: var(--layer6);">Layer 6</span></div>
+        <h3 style="margin-top: 8px;">What People Say</h3>
+        <p style="font-size: 13px;">Yelp reviews, Reddit discussions, Google Trends. Expressed perception — imperfect (selection bias, platform norms), but the closest proxy to direct sentiment we have today.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>23 Component Weights</h3>
+    <div id="weight-chart"></div>
+  </div>
+
+  <div class="insight-box warning" style="margin-top: 16px;">
+    <p><strong>The Missing Layer:</strong> Direct sentiment — "How safe do you feel right now, 0–10?" — is what Phase 1 will add. All six layers above are <em>approximating</em> what one question can measure directly. 28 sources, ~2.7M records, all trying to estimate what a simple NPS question could answer.</p>
+  </div>
+
+  <h3 style="margin-top: 24px;">Phase 1 Alert Capability (Mockup)</h3>
+  <div class="alert-mockup">
+    <div class="alert-icon" style="background: rgba(232,93,93,0.15); color: var(--accent-coral);">▼</div>
+    <div class="alert-content">
+      <div class="alert-title" style="color: var(--accent-coral);">Perception Drop Detected</div>
+      <div class="alert-body">Tenderloin / 6th & Market — Safety perception dropped from 32 → 18 over the last 72 hours. Primary drivers: nighttime disorder reports (+140%), streetlight outages (+3 new), foot traffic down 22% from baseline.</div>
+    </div>
+  </div>
+  <div class="alert-mockup">
+    <div class="alert-icon" style="background: rgba(56,201,122,0.15); color: var(--accent-green);">▲</div>
+    <div class="alert-content">
+      <div class="alert-title" style="color: var(--accent-green);">Perception Improvement</div>
+      <div class="alert-body">Union Square / Powell & Post — Safety perception up from 55 → 68 since CBD ambassador program expansion. Evening foot traffic +35%, disorder reports −28%, Yelp safety mentions improved.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 6: DATA & METHODS -->
+<!-- ============================================================ -->
+<div id="tab-methods" class="tab-content">
+  <h2>Data & Methods</h2>
+
+  <div class="card">
+    <h3>Formula</h3>
+    <p style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent-teal);">
+      SPI = 100 − scaled( Σ weight<sub>i</sub> × z_score(component<sub>i</sub>) )
+    </p>
+    <p style="font-size: 13px; margin-top: 8px;">
+      Z-score normalization with ±3σ soft cap. Exponential temporal decay (half-life ~6 months). Negative components (crime, disorder) reduce SPI; positive components (transit activity, business vitality) increase it.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>28+ Data Sources Across 6 Layers</h3>
+    <table class="comparison-table" style="font-size: 12px;">
+      <thead>
+        <tr><th>Layer</th><th>Source</th><th>Records</th><th>Signal</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="layer-badge" style="background: rgba(232,93,93,0.15); color: var(--layer1);">L1</span></td><td>SFPD Incidents</td><td>89,783</td><td>Severity-weighted crime</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(232,93,93,0.15); color: var(--layer1);">L1</span></td><td>Traffic Crashes</td><td>2,497</td><td>Pedestrian safety</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(232,93,93,0.15); color: var(--layer1);">L1</span></td><td>Fire/EMS Calls</td><td>752,430</td><td>Emergency density</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(232,168,56,0.15); color: var(--layer2);">L2</span></td><td>311 Cases (safety)</td><td>634,700</td><td>Visible disorder density</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(232,168,56,0.15); color: var(--layer2);">L2</span></td><td>Streetlight Outages</td><td>4,940</td><td>Lighting risk</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(232,168,56,0.15); color: var(--layer2);">L2</span></td><td>Noise Complaints</td><td>extracted</td><td>Noise disorder</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(232,168,56,0.15); color: var(--layer2);">L2</span></td><td>Street Trees</td><td>198,423</td><td>Environmental quality</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(232,168,56,0.15); color: var(--layer2);">L2</span></td><td>Resolution Times</td><td>41 hoods</td><td>Responsiveness</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(56,201,122,0.15); color: var(--layer3);">L3</span></td><td>BART Ridership</td><td>monthly</td><td>Transit confidence</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(56,201,122,0.15); color: var(--layer3);">L3</span></td><td>Bay Wheels Trips</td><td>~3M/yr</td><td>Cycling activity</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(56,201,122,0.15); color: var(--layer3);">L3</span></td><td>SFMTA Ridership</td><td>monthly</td><td>Transit ridership</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(74,144,217,0.15); color: var(--layer4);">L4</span></td><td>Weather (NOAA)</td><td>hourly</td><td>Discomfort index</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(74,144,217,0.15); color: var(--layer4);">L4</span></td><td>Daylight</td><td>calculated</td><td>Light vs. dark hours</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(74,144,217,0.15); color: var(--layer4);">L4</span></td><td>Air Quality</td><td>hourly</td><td>AQI / smoke days</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(139,92,246,0.15); color: var(--layer5);">L5</span></td><td>Business Register</td><td>200,000</td><td>Business vitality</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(139,92,246,0.15); color: var(--layer5);">L5</span></td><td>Food/Drink Density</td><td>8,211</td><td>Storefront activation</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(139,92,246,0.15); color: var(--layer5);">L5</span></td><td>Building Permits</td><td>~15K/yr</td><td>Investment signal</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(45,212,191,0.15); color: var(--layer6);">L6</span></td><td>Yelp Reviews</td><td>1,500 biz</td><td>Review sentiment</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(45,212,191,0.15); color: var(--layer6);">L6</span></td><td>Reddit Posts</td><td>319</td><td>Community sentiment</td></tr>
+        <tr><td><span class="layer-badge" style="background: rgba(45,212,191,0.15); color: var(--layer6);">L6</span></td><td>Google Trends</td><td>10 hoods</td><td>Digital concern</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Known Limitations</h3>
+    <p style="font-size: 13px;">
+      <strong>Reporting bias:</strong> 311 usage correlates with tech literacy, language, and trust in government. Wealthier neighborhoods may over-report relative to experience.<br><br>
+      <strong>Survival bias:</strong> People who feel most unsafe may avoid an area entirely, leaving no data trace. Absence of reports ≠ safety.<br><br>
+      <strong>Temporal lag:</strong> Some sources update daily, others monthly or annually. The model blends signals at different time scales.<br><br>
+      <strong>No denominator:</strong> Without foot traffic normalization, high-traffic areas generate more data of all types. Phase 1 adds the denominator.<br><br>
+      <strong>Proxy limitation:</strong> Every component is a proxy. None directly measures how people feel. Weights are from academic literature, not empirically calibrated to SF. Phase 1 provides the calibration data.
+    </p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 7: PARTNERS -->
+<!-- ============================================================ -->
+<div id="tab-partners" class="tab-content">
+  <h2>About the Partners</h2>
+
+  <div class="partner-card">
+    <div class="partner-name" style="color: var(--accent-teal);">City Science Lab San Francisco</div>
+    <p style="font-size: 14px;">
+      AI + systems modeling for civic innovation. Fiscally sponsored by SPUR (San Francisco Bay Area Planning & Urban Research). The Lab brings applied data science to the most pressing urban challenges — translating research into operational tools that city leaders can use today.
+    </p>
+    <p style="font-size: 13px; font-style: italic; color: var(--text-muted);">"Like SimCity — but for real."</p>
+    <p style="font-size: 13px;">The Lab contributes civic relationships, domain expertise in SF's operating environment, direct access to city stakeholders, and the operational infrastructure to deploy and sustain PSP as a city intelligence system.</p>
+  </div>
+
+  <div class="partner-card">
+    <div class="partner-name" style="color: var(--accent-blue);">MIT Media Lab — City Science</div>
+    <p style="font-size: 14px;">
+      MIT's City Science group researches urban architecture, mobility on demand, CityScope (tangible urban simulation), and operates the global City Science Network — labs in Hamburg, Shanghai, Taipei, Andorra, and now San Francisco.
+    </p>
+    <p style="font-size: 13px;">Research themes: urban AI, digital twins, autonomous mobility, responsive environments, data-driven urban design.</p>
+    <p style="font-size: 13px;">MIT contributes the Place Pulse intellectual lineage, data science rigor, academic credibility, and access to the global City Science Network for cross-city comparison.</p>
+  </div>
+
+  <div class="insight-box">
+    <p><strong>Together:</strong> City Science Lab SF provides the civic relationships and operational capacity. MIT provides the data science rigor and academic foundation. PSP is where they converge — an operational city intelligence system built on research-grade methodology.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 8: PARTNER WITH US -->
+<!-- ============================================================ -->
+<div id="tab-partner" class="tab-content">
+  <h2>Partner With Us</h2>
+
+  <p style="font-size: 15px; margin-bottom: 20px;">28 sources. ~2.7 million records. 23 components across 6 layers. All approximating what one question can measure directly: <strong>"How safe do you feel right now?"</strong></p>
+
+  <div class="card">
+    <h3>Phase 1: Direct Perception Collection</h3>
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-value" style="color: var(--accent-teal);">$150-200K</div>
+        <div class="metric-label">6-month pilot budget</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" style="color: var(--accent-green);">50K/mo</div>
+        <div class="metric-label">Response target by month 6</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" style="color: var(--accent-blue);">1 question</div>
+        <div class="metric-label">NPS on existing touchpoints</div>
+      </div>
+    </div>
+    <p style="font-size: 13px;">
+      <strong>Delivery channels:</strong> POS systems (Square, Toast), transit (Clipper), building access (Envoy), workforce (Homebase, Deputy). One question — "How safe do you feel right now, 0–10?" — embedded in transactions people already complete.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Intervention Framework: SIGHTS · SOUNDS · SMELLS · CIVIC SIGNALS</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+      <div style="background: var(--bg-secondary); padding: 14px; border-radius: 8px;">
+        <strong style="color: var(--accent-amber);">👁 SIGHTS</strong>
+        <p style="font-size: 12px; margin-top: 6px;">Lighting, murals, visible maintenance, storefront activation, guardian presence</p>
+      </div>
+      <div style="background: var(--bg-secondary); padding: 14px; border-radius: 8px;">
+        <strong style="color: var(--accent-blue);">👂 SOUNDS</strong>
+        <p style="font-size: 12px; margin-top: 6px;">Music, ambient sound design, noise reduction, acoustic environment</p>
+      </div>
+      <div style="background: var(--bg-secondary); padding: 14px; border-radius: 8px;">
+        <strong style="color: var(--accent-green);">👃 SMELLS</strong>
+        <p style="font-size: 12px; margin-top: 6px;">Cleanliness, waste management, food/coffee corridor activation</p>
+      </div>
+      <div style="background: var(--bg-secondary); padding: 14px; border-radius: 8px;">
+        <strong style="color: var(--accent-purple);">🏛 CIVIC SIGNALS</strong>
+        <p style="font-size: 12px; margin-top: 6px;">Wayfinding, public info, event activation, community programming</p>
+      </div>
+    </div>
+    <p style="font-size: 13px; margin-top: 12px;">Phase 1 doesn't just measure perception — it measures the impact of specific interventions. Deploy an ambassador program → did perception change? Install new lighting → did nighttime SPI improve? PSP closes the feedback loop.</p>
+  </div>
+
+  <div class="card">
+    <h3>Governance & Privacy</h3>
+    <p style="font-size: 13px;">
+      All data is aggregated — no individual identification. NPS responses are anonymous. Location is approximate (block-level, not building-level). Data governance board includes community representatives. Privacy by design: perception scores, not surveillance scores.
+    </p>
+  </div>
+
+  <div class="cta-box">
+    <h2>Let's Build This Together</h2>
+    <p style="font-size: 15px; color: var(--text-primary); margin-top: 8px;">
+      City Science Lab San Francisco × MIT Media Lab City Science
+    </p>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-top: 12px;">
+      Contact: mathew@citysciencelab.sf · citysciencelab.sf
+    </p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- JAVASCRIPT -->
+<!-- ============================================================ -->
+<script>
+// ============================================
+// Data & State
+// ============================================
+let mapData = null;
+let map = null;
+let geoLayer = null;
+let animationTimer = null;
+let currentTimeWindow = 2;
+let currentLayerView = 'overall';
+
+const TIME_WINDOWS = [
+  { key: 'early_morning', label: 'Early Morning', range: '5am–8am' },
+  { key: 'morning', label: 'Morning', range: '8am–11am' },
+  { key: 'midday', label: 'Midday', range: '11am–2pm' },
+  { key: 'afternoon', label: 'Afternoon', range: '2pm–5pm' },
+  { key: 'evening', label: 'Evening', range: '5pm–9pm' },
+  { key: 'night', label: 'Night', range: '9pm–5am' },
+];
+
+const LAYER_VIEWS = ['overall', 'layer1', 'layer2', 'layer3', 'layer4', 'layer5', 'layer6'];
+const LAYER_NAMES = {
+  'overall': 'Overall SPI',
+  'layer1': 'L1: Incidents',
+  'layer2': 'L2: Conditions',
+  'layer3': 'L3: Activity',
+  'layer4': 'L4: Environment',
+  'layer5': 'L5: Economy',
+  'layer6': 'L6: Perception',
+};
+
+// Demo SPI data (used if no real data available)
+const DEMO_SPI = {
+  "Bayview Hunters Point": 32, "Bernal Heights": 62, "Castro/Upper Market": 68,
+  "Chinatown": 45, "Excelsior": 55, "Financial District/South Beach": 58,
+  "Glen Park": 72, "Golden Gate Park": 65, "Haight Ashbury": 52,
+  "Hayes Valley": 56, "Inner Richmond": 70, "Inner Sunset": 74,
+  "Japantown": 63, "Lakeshore": 68, "Lincoln Park": 78,
+  "Lone Mountain/USF": 65, "Marina": 75, "McLaren Park": 48,
+  "Mission": 38, "Mission Bay": 62, "Nob Hill": 60,
+  "Noe Valley": 73, "North Beach": 58, "Oceanview/Merced/Ingleside": 55,
+  "Outer Mission": 50, "Outer Richmond": 72, "Outer Sunset": 76,
+  "Pacific Heights": 78, "Portola": 52, "Potrero Hill": 60,
+  "Presidio": 82, "Presidio Heights": 80, "Russian Hill": 68,
+  "Seacliff": 85, "South of Market": 35, "Sunset/Parkside": 74,
+  "Tenderloin": 15, "Treasure Island": 55, "Twin Peaks": 70,
+  "Visitacion Valley": 45, "West of Twin Peaks": 72, "Western Addition": 48,
+};
+
+// ============================================
+// Color scale
+// ============================================
+function spiColor(spi) {
+  if (spi === undefined || spi === null) return [120, 120, 140, 160];
+  if (spi < 20) return [220, 38, 38, 200];   // terrible
+  if (spi < 35) return [232, 93, 93, 190];   // poor
+  if (spi < 50) return [232, 168, 56, 180];  // moderate
+  if (spi < 65) return [163, 230, 53, 170];  // fair
+  if (spi < 80) return [56, 201, 122, 170];  // good
+  return [5, 150, 105, 180];                 // excellent
+}
+
+function spiColorCSS(spi) {
+  const c = spiColor(spi);
+  return `rgba(${c[0]},${c[1]},${c[2]},${c[3]/255})`;
+}
+
+function spiLabel(spi) {
+  if (spi < 20) return 'Critical';
+  if (spi < 35) return 'Poor';
+  if (spi < 50) return 'Moderate';
+  if (spi < 65) return 'Fair';
+  if (spi < 80) return 'Good';
+  return 'Excellent';
+}
+
+// ============================================
+// Get SPI for current view
+// ============================================
+function getSPI(props) {
+  const name = props.nhood || props.name;
+  
+  // Layer-specific view
+  if (currentLayerView !== 'overall') {
+    const key = currentLayerView + '_score';
+    if (props[key] !== undefined) return props[key];
+  }
+  
+  // Time-window specific
+  const tw = TIME_WINDOWS[currentTimeWindow];
+  const timeKey = 'spi_' + tw.key;
+  if (props[timeKey] !== undefined) return props[timeKey];
+  
+  // Overall SPI
+  if (props.spi !== undefined) return props.spi;
+  
+  // Demo fallback
+  return DEMO_SPI[name] || 50;
+}
+
+// ============================================
+// Tab switching
+// ============================================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  
+  if (tab === 'map' && !map) initMap();
+  if (tab === 'index') renderIndex();
+  if (tab === 'time') renderTimeHeatmap();
+  if (tab === 'howit') renderWeightChart();
+}
+
+// ============================================
+// Map
+// ============================================
+async function loadMapData() {
+  const sources = [
+    'data/spi_v4_output.json',
+    'data/sf_neighborhoods.geojson',
+    'https://raw.githubusercontent.com/sfchronicle/freesheetmap/master/data/sf_neighborhoods.geojson'
+  ];
+  
+  for (const src of sources) {
+    try {
+      const resp = await fetch(src);
+      if (resp.ok) {
+        const data = await resp.json();
+        console.log('Loaded map data from:', src);
+        
+        // Inject demo scores if not present
+        if (data.features) {
+          data.features.forEach(f => {
+            const name = f.properties.nhood || f.properties.name;
+            if (f.properties.spi === undefined && DEMO_SPI[name]) {
+              f.properties.spi = DEMO_SPI[name];
+              // Generate time-of-day variations
+              const base = DEMO_SPI[name];
+              const drop = name === 'Tenderloin' ? 12 :
+                           name === 'South of Market' ? 14 :
+                           name === 'Mission' ? 15 : 5;
+              f.properties.spi_early_morning = Math.max(5, base - drop);
+              f.properties.spi_morning = Math.min(95, base + 3);
+              f.properties.spi_midday = Math.min(95, base + 3);
+              f.properties.spi_afternoon = Math.min(95, base + 2);
+              f.properties.spi_evening = Math.max(5, base - Math.floor(drop/2));
+              f.properties.spi_night = Math.max(5, base - drop);
+              // Layer scores
+              for (let i = 1; i <= 6; i++) {
+                f.properties['layer' + i + '_score'] = Math.max(0, Math.min(100,
+                  base + Math.floor(Math.random() * 16 - 8)));
+              }
+            }
+          });
+        }
+        
+        return data;
+      }
+    } catch (e) {
+      console.log('Failed to load:', src, e);
+    }
+  }
+  return null;
+}
+
+async function initMap() {
+  mapData = await loadMapData();
+  if (!mapData) {
+    document.getElementById('map-container').innerHTML =
+      '<div style="padding:40px;text-align:center;color:var(--text-muted)">Unable to load map data</div>';
+    return;
+  }
+  
+  map = L.map('map-container', {
+    center: [37.76, -122.44],
+    zoom: 12,
+    zoomControl: true,
+    attributionControl: false,
+  });
+  
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 18,
+  }).addTo(map);
+  
+  renderGeoLayer();
+  
+  // Time slider
+  document.getElementById('time-slider').addEventListener('input', function() {
+    currentTimeWindow = parseInt(this.value);
+    updateTimeLabel();
+    updateMapColors();
+  });
+}
+
+function renderGeoLayer() {
+  if (geoLayer) map.removeLayer(geoLayer);
+  
+  geoLayer = L.geoJSON(mapData, {
+    style: function(feature) {
+      const spi = getSPI(feature.properties);
+      const c = spiColor(spi);
+      return {
+        fillColor: `rgb(${c[0]},${c[1]},${c[2]})`,
+        fillOpacity: c[3] / 255,
+        color: 'rgba(255,255,255,0.25)',
+        weight: 1,
+      };
+    },
+    onEachFeature: function(feature, layer) {
+      layer.on('click', function() {
+        const p = feature.properties;
+        const name = p.nhood || p.name;
+        const spi = getSPI(p);
+        
+        let popupHTML = `
+          <div style="font-family:DM Sans,sans-serif;min-width:220px;">
+            <div style="font-weight:700;font-size:14px;margin-bottom:6px;">${name}</div>
+            <div style="font-size:24px;font-weight:700;color:${spiColorCSS(spi)};">${spi}</div>
+            <div style="font-size:11px;color:#888;margin-bottom:8px;">${spiLabel(spi)} · ${LAYER_NAMES[currentLayerView]}</div>
+        `;
+        
+        // Layer breakdown
+        if (p.layer1_score !== undefined) {
+          popupHTML += '<div style="font-size:11px;margin-top:4px;">';
+          for (let i = 1; i <= 6; i++) {
+            const ls = p['layer' + i + '_score'];
+            if (ls !== undefined) {
+              const colors = ['','#e85d5d','#e8a838','#38c97a','#4a90d9','#8b5cf6','#2dd4bf'];
+              popupHTML += `<div style="display:flex;justify-content:space-between;padding:2px 0;">
+                <span style="color:${colors[i]}">L${i}</span>
+                <span style="font-family:monospace;">${Math.round(ls)}</span>
+              </div>`;
+            }
+          }
+          popupHTML += '</div>';
+        }
+        
+        // Top factors
+        if (p.top_factors) {
+          popupHTML += '<div style="font-size:10px;color:#666;margin-top:6px;border-top:1px solid #333;padding-top:4px;">Top factors: ';
+          popupHTML += p.top_factors.map(f => f.name.replace(/_/g, ' ')).join(', ');
+          popupHTML += '</div>';
+        }
+        
+        popupHTML += '</div>';
+        layer.bindPopup(popupHTML, { className: 'dark-popup' }).openPopup();
+      });
+    }
+  }).addTo(map);
+}
+
+function updateMapColors() {
+  if (!geoLayer) return;
+  geoLayer.eachLayer(function(layer) {
+    const spi = getSPI(layer.feature.properties);
+    const c = spiColor(spi);
+    layer.setStyle({
+      fillColor: `rgb(${c[0]},${c[1]},${c[2]})`,
+      fillOpacity: c[3] / 255,
+    });
+  });
+}
+
+function updateTimeLabel() {
+  const tw = TIME_WINDOWS[currentTimeWindow];
+  document.getElementById('time-label').textContent = tw.label + ' · ' + tw.range;
+}
+
+function toggleAnimate() {
+  const btn = document.getElementById('btn-animate');
+  if (animationTimer) {
+    clearInterval(animationTimer);
+    animationTimer = null;
+    btn.textContent = '▶ Animate';
+    btn.classList.remove('active');
+  } else {
+    btn.textContent = '⏸ Pause';
+    btn.classList.add('active');
+    animationTimer = setInterval(() => {
+      currentTimeWindow = (currentTimeWindow + 1) % 6;
+      document.getElementById('time-slider').value = currentTimeWindow;
+      updateTimeLabel();
+      updateMapColors();
+    }, 1500);
+  }
+}
+
+function cycleLayer() {
+  const idx = LAYER_VIEWS.indexOf(currentLayerView);
+  currentLayerView = LAYER_VIEWS[(idx + 1) % LAYER_VIEWS.length];
+  document.getElementById('btn-layer').textContent = LAYER_NAMES[currentLayerView];
+  updateMapColors();
+}
+
+// ============================================
+// Safety Index bars
+// ============================================
+function renderIndex() {
+  const container = document.getElementById('index-bars');
+  if (!mapData) { loadMapData().then(d => { mapData = d; renderIndex(); }); return; }
+  
+  const hoods = mapData.features.map(f => {
+    const p = f.properties;
+    const name = p.nhood || p.name;
+    const spi = p.spi !== undefined ? p.spi : (DEMO_SPI[name] || 50);
+    return { name, spi };
+  }).sort((a, b) => b.spi - a.spi);
+  
+  let html = '';
+  hoods.forEach(h => {
+    html += `<div class="index-bar-container">
+      <div class="index-bar-row">
+        <div class="index-bar-name">${h.name}</div>
+        <div class="index-bar-track">
+          <div class="index-bar-fill" style="width:${h.spi}%;background:${spiColorCSS(h.spi)};"></div>
+        </div>
+        <div class="index-bar-score">${Math.round(h.spi)}</div>
+      </div>
+    </div>`;
+  });
+  
+  container.innerHTML = html;
+}
+
+// ============================================
+// Time heatmap
+// ============================================
+function renderTimeHeatmap() {
+  const container = document.getElementById('time-heatmap');
+  const statsContainer = document.getElementById('time-stats');
+  if (!mapData) { loadMapData().then(d => { mapData = d; renderTimeHeatmap(); }); return; }
+  
+  // Select top 15 neighborhoods by variation
+  const hoods = mapData.features.map(f => {
+    const p = f.properties;
+    const name = p.nhood || p.name;
+    const base = p.spi !== undefined ? p.spi : (DEMO_SPI[name] || 50);
+    const scores = TIME_WINDOWS.map(tw => {
+      const key = 'spi_' + tw.key;
+      return p[key] !== undefined ? p[key] : base;
+    });
+    const variation = Math.max(...scores) - Math.min(...scores);
+    return { name, scores, variation, base };
+  }).sort((a, b) => b.variation - a.variation).slice(0, 15);
+  
+  const cols = TIME_WINDOWS.length + 1;
+  let html = `<div class="heatmap-grid" style="grid-template-columns: 180px repeat(${TIME_WINDOWS.length}, 1fr);">`;
+  
+  // Header
+  html += '<div class="heatmap-header"></div>';
+  TIME_WINDOWS.forEach(tw => {
+    html += `<div class="heatmap-header">${tw.label}</div>`;
+  });
+  
+  // Rows
+  hoods.forEach(h => {
+    html += `<div class="heatmap-label">${h.name}</div>`;
+    h.scores.forEach(s => {
+      html += `<div class="heatmap-cell" style="background:${spiColorCSS(s)};color:${s < 40 ? '#fff' : '#111'}">${Math.round(s)}</div>`;
+    });
+  });
+  
+  html += '</div>';
+  container.innerHTML = html;
+  
+  // Summary stats
+  const allDay = mapData.features.map(f => {
+    const p = f.properties;
+    return p.spi_midday !== undefined ? p.spi_midday : (DEMO_SPI[p.nhood || p.name] || 50);
+  });
+  const allNight = mapData.features.map(f => {
+    const p = f.properties;
+    const name = p.nhood || p.name;
+    return p.spi_night !== undefined ? p.spi_night : Math.max(10, (DEMO_SPI[name] || 50) - 8);
+  });
+  
+  const avgDay = Math.round(allDay.reduce((a,b)=>a+b,0) / allDay.length);
+  const avgNight = Math.round(allNight.reduce((a,b)=>a+b,0) / allNight.length);
+  const maxDrop = hoods.reduce((max, h) => {
+    const drop = Math.max(...h.scores) - Math.min(...h.scores);
+    return drop > max.drop ? { name: h.name, drop } : max;
+  }, { name: '', drop: 0 });
+  
+  statsContainer.innerHTML = `
+    <div class="metric-card">
+      <div class="metric-value" style="color:var(--accent-green)">${avgDay}</div>
+      <div class="metric-label">Citywide day avg</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value" style="color:var(--accent-coral)">${avgNight}</div>
+      <div class="metric-label">Citywide night avg</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value" style="color:var(--accent-amber)">${avgDay - avgNight}</div>
+      <div class="metric-label">Day → Night drop</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value" style="color:var(--accent-coral);font-size:14px;">${maxDrop.name}</div>
+      <div class="metric-label">Largest swing (${maxDrop.drop} pts)</div>
+    </div>
+  `;
+}
+
+// ============================================
+// Weight chart
+// ============================================
+function renderWeightChart() {
+  const container = document.getElementById('weight-chart');
+  
+  const components = [
+    { name: 'Disorder Density', weight: 14, layer: 2 },
+    { name: 'Crime Severity', weight: 12, layer: 1 },
+    { name: 'Resolution Time', weight: 8, layer: 2 },
+    { name: 'Disorder Salience', weight: 6, layer: 2 },
+    { name: 'Temporal Risk', weight: 6, layer: 3 },
+    { name: 'Review Sentiment', weight: 6, layer: 6 },
+    { name: 'Lighting Risk', weight: 5, layer: 2 },
+    { name: 'Transit Confidence', weight: 5, layer: 3 },
+    { name: 'Pedestrian Safety', weight: 4, layer: 1 },
+    { name: 'Emergency Density', weight: 4, layer: 1 },
+    { name: 'Business Vitality', weight: 4, layer: 5 },
+    { name: 'Environmental Quality', weight: 3, layer: 2 },
+    { name: 'Weather Exposure', weight: 3, layer: 4 },
+    { name: 'Daylight Ratio', weight: 3, layer: 4 },
+    { name: 'Community Sentiment', weight: 2, layer: 6 },
+    { name: 'Digital Concern', weight: 2, layer: 6 },
+    { name: 'Cycling Activity', weight: 2, layer: 3 },
+    { name: 'Food/Drink Density', weight: 2, layer: 5 },
+    { name: 'Construction Investment', weight: 2, layer: 5 },
+    { name: 'Noise Disorder', weight: 2, layer: 2 },
+    { name: 'Waste/Odor', weight: 2, layer: 2 },
+    { name: 'Air Quality', weight: 2, layer: 4 },
+  ];
+  
+  const layerColors = {
+    1: 'var(--layer1)', 2: 'var(--layer2)', 3: 'var(--layer3)',
+    4: 'var(--layer4)', 5: 'var(--layer5)', 6: 'var(--layer6)',
+  };
+  
+  const maxWeight = Math.max(...components.map(c => c.weight));
+  
+  let html = '';
+  components.forEach(c => {
+    const pct = (c.weight / maxWeight * 100).toFixed(0);
+    html += `<div class="weight-bar-container">
+      <div class="weight-bar-row">
+        <div class="weight-bar-label">
+          <span style="color:${layerColors[c.layer]}; font-size:9px;">L${c.layer}</span>
+          ${c.name}
+        </div>
+        <div class="weight-bar-track">
+          <div class="weight-bar-fill" style="width:${pct}%;background:${layerColors[c.layer]};"></div>
+        </div>
+        <div class="weight-bar-pct">${c.weight}%</div>
+      </div>
+    </div>`;
+  });
+  
+  container.innerHTML = html;
+}
+
+// ============================================
+// Init
+// ============================================
+updateTimeLabel();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,357 @@
+{
+  "model_type": "Gaussian Process",
+  "n_labeled": 38,
+  "n_features": 18,
+  "r_squared": 0.8963,
+  "loo_cv_rmse": 11.12,
+  "feature_importance": {
+    "construction_invest": 7.998,
+    "crime_severity": 4.584,
+    "noise_disorder": 3.869,
+    "pedestrian_safety": 3.731,
+    "temporal_risk": 3.49,
+    "resolution_responsive": 3.423,
+    "disorder_density": 3.184,
+    "lighting_risk": 2.652,
+    "review_sentiment": 2.439,
+    "emergency_density": 2.314,
+    "transit_confidence": 1.994,
+    "environmental_quality": 1.116,
+    "disorder_salience": 0.97,
+    "waste_odor": 0.0,
+    "cycling_activity": 0.0,
+    "business_vitality": 0.0,
+    "food_drink_density": 0.0,
+    "event_activation": 0.0
+  },
+  "neighborhoods": {
+    "Bayview Hunters Point": {
+      "spi": 43.5,
+      "sigma": 5.2,
+      "ci_lower": 33.2,
+      "ci_upper": 53.8,
+      "ground_truth": 30,
+      "residual": 13.5
+    },
+    "Bernal Heights": {
+      "spi": 56.7,
+      "sigma": 4.3,
+      "ci_lower": 48.3,
+      "ci_upper": 65.1,
+      "ground_truth": 62,
+      "residual": -5.3
+    },
+    "Castro/Upper Market": {
+      "spi": 56.5,
+      "sigma": 4.9,
+      "ci_lower": 46.9,
+      "ci_upper": 66.2,
+      "ground_truth": 58,
+      "residual": -1.5
+    },
+    "Chinatown": {
+      "spi": 40.3,
+      "sigma": 5.2,
+      "ci_lower": 30.2,
+      "ci_upper": 50.4,
+      "ground_truth": 35,
+      "residual": 5.3
+    },
+    "Excelsior": {
+      "spi": 58.7,
+      "sigma": 4.5,
+      "ci_lower": 49.9,
+      "ci_upper": 67.5,
+      "ground_truth": 55,
+      "residual": 3.7
+    },
+    "Financial District/South Beach": {
+      "spi": 46.6,
+      "sigma": 5.8,
+      "ci_lower": 35.1,
+      "ci_upper": 58.1,
+      "ground_truth": 50,
+      "residual": -3.4
+    },
+    "Glen Park": {
+      "spi": 64.1,
+      "sigma": 5.8,
+      "ci_lower": 52.8,
+      "ci_upper": 75.4,
+      "ground_truth": 70,
+      "residual": -5.9
+    },
+    "Inner Richmond": {
+      "spi": 71.0,
+      "sigma": 4.0,
+      "ci_lower": 63.2,
+      "ci_upper": 78.7,
+      "ground_truth": 68,
+      "residual": 3.0
+    },
+    "Golden Gate Park": {
+      "spi": 63.1,
+      "sigma": 5.4,
+      "ci_lower": 52.5,
+      "ci_upper": 73.7,
+      "ground_truth": null,
+      "residual": null
+    },
+    "Haight Ashbury": {
+      "spi": 48.3,
+      "sigma": 4.5,
+      "ci_lower": 39.4,
+      "ci_upper": 57.1,
+      "ground_truth": 45,
+      "residual": 3.3
+    },
+    "Hayes Valley": {
+      "spi": 50.4,
+      "sigma": 4.6,
+      "ci_lower": 41.5,
+      "ci_upper": 59.4,
+      "ground_truth": 48,
+      "residual": 2.4
+    },
+    "Inner Sunset": {
+      "spi": 73.2,
+      "sigma": 3.6,
+      "ci_lower": 66.1,
+      "ci_upper": 80.4,
+      "ground_truth": 70,
+      "residual": 3.2
+    },
+    "Japantown": {
+      "spi": 55.5,
+      "sigma": 5.0,
+      "ci_lower": 45.8,
+      "ci_upper": 65.2,
+      "ground_truth": 58,
+      "residual": -2.5
+    },
+    "McLaren Park": {
+      "spi": 51.3,
+      "sigma": 5.6,
+      "ci_lower": 40.4,
+      "ci_upper": 62.3,
+      "ground_truth": 48,
+      "residual": 3.3
+    },
+    "Tenderloin": {
+      "spi": 21.4,
+      "sigma": 5.5,
+      "ci_lower": 10.6,
+      "ci_upper": 32.2,
+      "ground_truth": 18,
+      "residual": 3.4
+    },
+    "Lakeshore": {
+      "spi": 68.1,
+      "sigma": 4.3,
+      "ci_lower": 59.7,
+      "ci_upper": 76.5,
+      "ground_truth": 68,
+      "residual": 0.1
+    },
+    "Lincoln Park": {
+      "spi": 69.6,
+      "sigma": 5.0,
+      "ci_lower": 59.7,
+      "ci_upper": 79.4,
+      "ground_truth": 85,
+      "residual": -15.4
+    },
+    "Lone Mountain/USF": {
+      "spi": 63.7,
+      "sigma": 4.6,
+      "ci_lower": 54.6,
+      "ci_upper": 72.8,
+      "ground_truth": 62,
+      "residual": 1.7
+    },
+    "Marina": {
+      "spi": 68.1,
+      "sigma": 4.4,
+      "ci_lower": 59.5,
+      "ci_upper": 76.7,
+      "ground_truth": 75,
+      "residual": -6.9
+    },
+    "Russian Hill": {
+      "spi": 66.1,
+      "sigma": 3.9,
+      "ci_lower": 58.4,
+      "ci_upper": 73.8,
+      "ground_truth": 68,
+      "residual": -1.9
+    },
+    "Mission": {
+      "spi": 33.9,
+      "sigma": 5.7,
+      "ci_lower": 22.6,
+      "ci_upper": 45.1,
+      "ground_truth": 38,
+      "residual": -4.1
+    },
+    "Mission Bay": {
+      "spi": 46.7,
+      "sigma": 5.9,
+      "ci_lower": 35.1,
+      "ci_upper": 58.4,
+      "ground_truth": null,
+      "residual": null
+    },
+    "Nob Hill": {
+      "spi": 52.2,
+      "sigma": 4.2,
+      "ci_lower": 44.0,
+      "ci_upper": 60.3,
+      "ground_truth": 52,
+      "residual": 0.2
+    },
+    "Seacliff": {
+      "spi": 79.2,
+      "sigma": 5.0,
+      "ci_lower": 69.4,
+      "ci_upper": 89.0,
+      "ground_truth": 85,
+      "residual": -5.8
+    },
+    "Noe Valley": {
+      "spi": 73.0,
+      "sigma": 3.6,
+      "ci_lower": 65.9,
+      "ci_upper": 80.1,
+      "ground_truth": 74,
+      "residual": -1.0
+    },
+    "North Beach": {
+      "spi": 51.5,
+      "sigma": 3.9,
+      "ci_lower": 43.9,
+      "ci_upper": 59.0,
+      "ground_truth": 55,
+      "residual": -3.5
+    },
+    "Oceanview/Merced/Ingleside": {
+      "spi": 57.6,
+      "sigma": 4.7,
+      "ci_lower": 48.5,
+      "ci_upper": 66.7,
+      "ground_truth": 55,
+      "residual": 2.6
+    },
+    "South of Market": {
+      "spi": 27.1,
+      "sigma": 4.9,
+      "ci_lower": 17.5,
+      "ci_upper": 36.8,
+      "ground_truth": 30,
+      "residual": -2.9
+    },
+    "Sunset/Parkside": {
+      "spi": 69.6,
+      "sigma": 3.6,
+      "ci_lower": 62.5,
+      "ci_upper": 76.7,
+      "ground_truth": 72,
+      "residual": -2.4
+    },
+    "Outer Mission": {
+      "spi": 55.5,
+      "sigma": 5.5,
+      "ci_lower": 44.7,
+      "ci_upper": 66.3,
+      "ground_truth": 50,
+      "residual": 5.5
+    },
+    "Outer Richmond": {
+      "spi": 65.9,
+      "sigma": 4.1,
+      "ci_lower": 57.9,
+      "ci_upper": 73.9,
+      "ground_truth": 72,
+      "residual": -6.1
+    },
+    "Pacific Heights": {
+      "spi": 71.9,
+      "sigma": 4.4,
+      "ci_lower": 63.2,
+      "ci_upper": 80.5,
+      "ground_truth": 80,
+      "residual": -8.1
+    },
+    "Portola": {
+      "spi": 55.6,
+      "sigma": 4.0,
+      "ci_lower": 47.8,
+      "ci_upper": 63.3,
+      "ground_truth": 52,
+      "residual": 3.6
+    },
+    "Potrero Hill": {
+      "spi": 62.2,
+      "sigma": 4.5,
+      "ci_lower": 53.4,
+      "ci_upper": 71.1,
+      "ground_truth": 60,
+      "residual": 2.2
+    },
+    "Presidio": {
+      "spi": 79.6,
+      "sigma": 5.7,
+      "ci_lower": 68.5,
+      "ci_upper": 90.7,
+      "ground_truth": 88,
+      "residual": -8.4
+    },
+    "Presidio Heights": {
+      "spi": 76.8,
+      "sigma": 4.5,
+      "ci_lower": 68.0,
+      "ci_upper": 85.6,
+      "ground_truth": 82,
+      "residual": -5.2
+    },
+    "Treasure Island": {
+      "spi": 58.5,
+      "sigma": 8.0,
+      "ci_lower": 42.8,
+      "ci_upper": 74.2,
+      "ground_truth": null,
+      "residual": null
+    },
+    "Twin Peaks": {
+      "spi": 71.1,
+      "sigma": 4.4,
+      "ci_lower": 62.5,
+      "ci_upper": 79.8,
+      "ground_truth": 72,
+      "residual": -0.9
+    },
+    "Visitacion Valley": {
+      "spi": 51.5,
+      "sigma": 4.5,
+      "ci_lower": 42.7,
+      "ci_upper": 60.3,
+      "ground_truth": 45,
+      "residual": 6.5
+    },
+    "West of Twin Peaks": {
+      "spi": 75.4,
+      "sigma": 3.8,
+      "ci_lower": 68.0,
+      "ci_upper": 82.8,
+      "ground_truth": 72,
+      "residual": 3.4
+    },
+    "Western Addition": {
+      "spi": 46.5,
+      "sigma": 3.8,
+      "ci_lower": 39.1,
+      "ci_upper": 54.0,
+      "ground_truth": 40,
+      "residual": 6.5
+    }
+  }
+}
